@@ -25,11 +25,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/admin/add/**").hasAnyAuthority("ADMIN")
-                .antMatchers("/admin/edit/**").hasAnyAuthority("ADMIN")
-                .antMatchers("/admin/delete/**").hasAnyAuthority("ADMIN")
-                .antMatchers("/", "/login", "/register", "/registerAdmin").permitAll()
                 .antMatchers("/user/**").hasRole("USER")
+                .antMatchers("/login", "/register", "/registerAdmin", "/resource").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -43,7 +40,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(username -> userService.loadUserByUsername(username)).passwordEncoder(NoOpPasswordEncoder.getInstance());
+        auth.userDetailsService(userService::loadUserByUsername)
+                .passwordEncoder(NoOpPasswordEncoder.getInstance());
     }
-
 }

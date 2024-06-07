@@ -1,10 +1,8 @@
 package habsida.spring.boot_security.demo.model;
 
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,15 +13,10 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
     private String firstname;
-    @Column
     private String lastname;
-    @Column
     private String email;
-    @Column
     private String username;
-    @Column
     private String password;
 
 
@@ -34,7 +27,8 @@ public class User implements UserDetails {
 
     public User(){}
 
-    public User(String firstname, String lastname, String email, Set<Role> roles, String username, String password) {
+    public User(Long id, String firstname, String lastname, String email, String username, Set<Role> roles, String password) {
+        this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
@@ -52,7 +46,7 @@ public class User implements UserDetails {
     }
 
     public String getFirstname() {
-        return this.firstname;
+        return firstname;
     }
 
     public void setFirstname(String firstname) {
@@ -60,7 +54,7 @@ public class User implements UserDetails {
     }
 
     public String getLastname() {
-        return this.lastname;
+        return lastname;
     }
 
     public void setLastname(String lastname) {
@@ -68,7 +62,7 @@ public class User implements UserDetails {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
@@ -119,7 +113,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Set<Role> getAuthorities() {
         return roles;
     }
 

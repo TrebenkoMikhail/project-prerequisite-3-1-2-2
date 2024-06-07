@@ -13,9 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
@@ -38,8 +39,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
     @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
     public void saveUser(User user) {
         Set<Role> roles = new HashSet<>();
@@ -61,10 +62,25 @@ public class UserServiceImpl implements UserService {
         user.setRoles(roles);
         userRepository.save(user);
     }
+
     @Override
     public void updateUser(User user) {
-        saveUser(user);
+        logger.info("Received user for update: {}", user);
+        User existingUser = userRepository.findById(user.getId()).orElseThrow(() ->
+                new UsernameNotFoundException("User not found!"));
+        existingUser.setId(user.getId());
+        existingUser.setFirstname(user.getFirstname());
+        existingUser.setLastname(user.getLastname());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setUsername(user.getUsername());
+        existingUser.setPassword(user.getPassword());
+        Set<Role> roles = new HashSet<>();
+        roles.add(roleRepository.findByName("ROLE_USER"));
+        existingUser.setRoles(roles);
+        logger.info("User updated successfully: {}", existingUser);
+        userRepository.save(existingUser);
     }
+
     @Override
     public void deleteUserById(Long id) {
         if(userRepository.existsById(id)) {
@@ -89,8 +105,13 @@ public class UserServiceImpl implements UserService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .authorities(authorities)
+                .authorities(user.getRoles())
                 .build();
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Override
@@ -100,4 +121,11 @@ public class UserServiceImpl implements UserService {
                 ", roleRepository=" + roleRepository +
                 '}';
     }
+    @Override
+    public Set<Role> getUserRolesById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return user.getRoles();
+    }
+
 }
