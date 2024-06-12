@@ -1,8 +1,12 @@
 package habsida.spring.boot_security.demo.model;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,8 +22,7 @@ public class User implements UserDetails {
     private String email;
     private String username;
     private String password;
-
-
+    
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
     joinColumns = @JoinColumn(name = "user_id"))
@@ -93,6 +96,9 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
+    public void addRoles(Role role) {
+        this.roles.add(role);
+    }
 
     @Override
     public String toString() {
@@ -106,14 +112,9 @@ public class User implements UserDetails {
                 ", roles=" + roles +
                 '}';
     }
-    public String getRolesAsString() {
-        return roles.stream()
-                .map(Role::getName)
-                .collect(Collectors.joining(", "));
-    }
 
     @Override
-    public Set<Role> getAuthorities() {
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }
 

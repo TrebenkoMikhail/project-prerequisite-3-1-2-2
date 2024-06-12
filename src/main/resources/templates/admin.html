@@ -27,7 +27,7 @@
         <td th:text="${user.email}">Email</td>
         <td th:text="${user.username}">Username</td>
         <td th:text="${user.password}">Password</td>
-        <td th:each="role : ${user.authorities}" th:text="${role}">ROLE</td>
+        <td th:each="role : ${user.authorities}" th:text="${role.authority}">Roles</td>
         <td>
             <a th:href="@{/admin/edit/{id}(id=${user.id})}">Edit User</a>
             <a th:href="@{/admin/delete/{id}(id=${user.id})}">Delete</a>

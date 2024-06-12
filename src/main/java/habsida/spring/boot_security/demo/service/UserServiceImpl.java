@@ -7,13 +7,14 @@ import habsida.spring.boot_security.demo.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,12 +27,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -43,40 +45,29 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
     public void saveUser(User user) {
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName("ROLE_USER"));
-        user.setRoles(roles);
-        userRepository.save(user);
-    }
-    public void saveAdmin(User user) {
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName("ROLE_ADMIN"));
-        user.setRoles(roles);
+        user.setRoles(user.getRoles());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
+
     @Override
-    public void addUser(User user, String role) {
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName(role));
-        user.setRoles(roles);
+    public void addUser(User user) {
+        user.setRoles(user.getRoles());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
     @Override
     public void updateUser(User user) {
-        logger.info("Received user for update: {}", user);
-        User existingUser = userRepository.findById(user.getId()).orElseThrow(() ->
-                new UsernameNotFoundException("User not found!"));
+        User existingUser = userRepository.findById(user.getId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         existingUser.setId(user.getId());
+        existingUser.setUsername(user.getUsername());
+        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         existingUser.setFirstname(user.getFirstname());
         existingUser.setLastname(user.getLastname());
         existingUser.setEmail(user.getEmail());
-        existingUser.setUsername(user.getUsername());
-        existingUser.setPassword(user.getPassword());
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName("ROLE_USER"));
-        existingUser.setRoles(roles);
+        existingUser.setRoles(user.getRoles());
         logger.info("User updated successfully: {}", existingUser);
         userRepository.save(existingUser);
     }
@@ -105,7 +96,7 @@ public class UserServiceImpl implements UserService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .authorities(user.getRoles())
+                .authorities(authorities)
                 .build();
     }
 
@@ -114,13 +105,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username);
     }
 
-    @Override
-    public String toString() {
-        return "UserServiceImpl{" +
-                "userRepository=" + userRepository +
-                ", roleRepository=" + roleRepository +
-                '}';
-    }
     @Override
     public Set<Role> getUserRolesById(Long userId) {
         User user = userRepository.findById(userId)

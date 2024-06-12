@@ -6,34 +6,37 @@
 </head>
 <body>
 <h1>Edit User</h1>
-<form action="@{/admin/edit}" th:object="${user}" method="post" >
-    <input type="hidden" th:field="*{id}">
+<form th:action="@{/admin/edit/{id}(id=${user.id})}" method="post" >
+    <input type="hidden" th:field="*{user.id}">
+
     <div>
         <label for="username">Username: </label>
-        <input type="text" id="username" name="username" th:field="*{username}" >
+        <input type="text" id="username" name="username" th:field="*{user.username}" required>
     </div>
     <div>
         <label for="password">Password: </label>
-        <input type="password" id="password" name="password" th:field="*{password}" >
+        <input type="password" id="password" name="password" th:field="*{user.password}" required>
     </div>
     <div>
         <label for="firstname">Firstname: </label>
-        <input type="text" id="firstname" name="firstname" th:field="*{firstname}" >
+        <input type="text" id="firstname" name="firstname" th:field="*{user.firstname}" required>
     </div>
     <div>
         <label for="lastname">Lastname: </label>
-        <input type="text" id="lastname" name="lastname" th:field="*{lastname}" >
+        <input type="text" id="lastname" name="lastname" th:field="*{user.lastname}" required>
     </div>
     <div>
         <label for="email">Email: </label>
-        <input type="text" id="email" name="email" th:field="*{email}">
+        <input type="text" id="email" name="email" th:field="*{user.email}" required>
     </div>
-
-    <button type="submit">Submit</button>
+    <div>
+        <label for="roles">Roles</label>
+        <select id="roles" name="roles" th:field="*{user.roles}">
+            <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+        </select>
+    </div>
+    <button type="submit">Update</button>
 </form>
-<div th:if="${errorMessage}">
-    <p th:text="${errorMessage}" style="color: red;"></p>
-</div>
 <a href="/admin">Back to Admin</a>
 </body>
 </html>
