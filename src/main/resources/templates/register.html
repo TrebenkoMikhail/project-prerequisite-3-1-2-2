@@ -1,40 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <h1>Register</h1>
     <form th:action="@{/register}" method="post">
-        <div>
+        <div class="container mt-5">
             <label for="firstname">Firstname: </label>
             <input type="text" id="firstname" name="firstname">
         </div>
-        <div>
+        <div class="container mt-5">
             <label for="lastname">Lastname: </label>
             <input type="text" id="lastname" name="lastname">
         </div>
-        <div>
+        <div class="container mt-5">
+            <label for="age">Age: </label>
+            <input type="text" id="age" name="age">
+        </div>
+        <div class="container mt-5">
             <label for="email">Email: </label>
             <input type="text" id="email" name="email">
         </div>
-        <div>
+        <div class="container mt-5">
             <label for="username">Username: </label>
             <input type="text" id="username" name="username">
         </div>
-        <div>
+        <div class="container mt-5">
             <label for="password">Password: </label>
             <input type="text" id="password" name="password">
         </div>
-        <div>
+        <div class="container mt-5">
             <label for="roles">Roles</label>
             <select id="roles" name="roles" th:field="*{user.roles}">
                 <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
             </select>
         </div>
-        <div>
+        <div class="container mt-5">
             <button type="submit">Register</button>
         </div>
     </form>
+    <script src="/js/jquery-3.5.1.slim.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
 </body>
 </html>

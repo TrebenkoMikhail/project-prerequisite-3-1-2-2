@@ -66,6 +66,7 @@ public class UserServiceImpl implements UserService {
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         existingUser.setFirstname(user.getFirstname());
         existingUser.setLastname(user.getLastname());
+        existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
         existingUser.setRoles(user.getRoles());
         logger.info("User updated successfully: {}", existingUser);
@@ -112,4 +113,7 @@ public class UserServiceImpl implements UserService {
         return user.getRoles();
     }
 
+    public RoleRepository getRoleRepository() {
+        return roleRepository;
+    }
 }

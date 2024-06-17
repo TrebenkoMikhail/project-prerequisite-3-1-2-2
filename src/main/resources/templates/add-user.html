@@ -2,32 +2,38 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add User</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <h1>Add User</h1>
 <form th:action="@{/admin/add}" method="post">
-    <div>
+    <div class="container mt-5">
         <label for="firstname">Firstname: </label>
         <input type="text" id="firstname" name="firstname">
     </div>
-    <div>
+    <div class="container mt-5">
         <label for="lastname">Lastname: </label>
         <input type="text" id="lastname" name="lastname">
     </div>
-    <div>
+    <div class="container mt-5">
+        <label for="age">Age: </label>
+        <input type="text" id="age" name="age">
+    </div>
+    <div class="container mt-5">
         <label for="email">Email: </label>
         <input type="text" id="email" name="email">
     </div>
-    <div>
+    <div class="container mt-5">
         <label for="username">Username: </label>
         <input type="text" id="username" name="username">
     </div>
-    <div>
+    <div class="container mt-5">
         <label for="password">Password: </label>
         <input type="text" id="password" name="password">
     </div>
-    <div>
+    <div class="container mt-5">
         <label for="roles">Roles</label>
         <select id="roles" name="roles" th:field="*{user.roles}">
             <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
@@ -35,6 +41,8 @@
     </div>
     <input type="submit" value="Submit"/>
 </form>
-
+<script src="/js/jquery-3.5.1.slim.min.js"></script>
+<script src="/js/popper.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
 </body>
 </html>

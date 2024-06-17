@@ -77,6 +77,11 @@ public class AdminController {
         return "redirect:/admin";
     }
     @GetMapping(value = "/admin/delete/{id}")
+    public String deleteUserByIdForm(@PathVariable("id") Long id, Model model) {
+        model.addAttribute("user", id);
+        return "delete-user";
+    }
+    @GetMapping(value = "/admin/delete/{id}")
     public String deleteUserById(@PathVariable("id") Long id) {
         userService.deleteUserById(id);
         return "redirect:/admin";

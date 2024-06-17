@@ -1,14 +1,11 @@
 package habsida.spring.boot_security.demo.model;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users1")
@@ -19,6 +16,7 @@ public class User implements UserDetails {
     private Long id;
     private String firstname;
     private String lastname;
+    private String age;
     private String email;
     private String username;
     private String password;
@@ -28,12 +26,21 @@ public class User implements UserDetails {
     joinColumns = @JoinColumn(name = "user_id"))
     private Set<Role> roles;
 
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
     public User(){}
 
-    public User(Long id, String firstname, String lastname, String email, String username, Set<Role> roles, String password) {
+    public User(Long id, String firstname, String lastname, String age,String email, String username, Set<Role> roles, String password) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
+        this.age = age;
         this.email = email;
         this.roles = roles;
         this.username = username;
