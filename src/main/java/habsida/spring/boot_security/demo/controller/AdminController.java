@@ -44,7 +44,7 @@ public class AdminController {
     private String adminAllUsers(Model model, @AuthenticationPrincipal UserDetails currentUser){
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("allRoles", roleRepository.findAll());
         model.addAttribute("user", new User());
         model.addAttribute("activeTab", "allUsers");
         return "admin-allUsers";
@@ -59,9 +59,7 @@ public class AdminController {
         return "admin-allUsers";
     }
     @PostMapping(value = "/admin/add")
-    public String addUser(@ModelAttribute User user, Set<Long> roles) {
-        List<Role> userRoles = roleRepository.findAllById(roles);
-        user.setRoles(new HashSet<>(userRoles));
+    public String addUser(@ModelAttribute User user) {
         userService.addUser(user);
         return "redirect:/admin/allUsers";
     }
