@@ -1,0 +1,38 @@
+<div th:fragment="editUserFragment">
+    <div class="tab-content mt-3">
+        <h2>Edit User</h2>
+        <form th:action="@{/admin/edit/__${user.id}__}" method="post" th:object="${user}">
+            <div class="form-group">
+                <label for="firstname">Firstname: </label>
+                <input type="text" class="form-control" id="firstname" th:field="*{user.firstname}" required>
+            </div>
+            <div class="form-group">
+                <label for="lastname">Lastname: </label>
+                <input type="text" class="form-control" id="lastname" th:field="*{user.lastname}" required>
+            </div>
+            <div class="form-group">
+                <label for="age">Age: </label>
+                <input type="text" class="form-control" id="age" th:field="*{user.age}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email: </label>
+                <input type="text" class="form-control" id="email" th:field="*{user.email}" required>
+            </div>
+            <div class="form-group">
+                <label for="username">Username: </label>
+                <input type="text" class="form-control" id="username" th:field="*{user.username}" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password: </label>
+                <input type="password" class="form-control" id="password" th:field="*{user.password}" required>
+            </div>
+            <div class="form-group">
+                <label for="roles">Role</label>
+                <select class="form-control" id="roles" th:field="*{user.roles}" multiple required>
+                    <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Save changes</button>
+        </form>
+    </div>
+</div>

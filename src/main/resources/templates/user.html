@@ -1,23 +1,76 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"  lang="">
+<html xmlns:th="https://www.thymeleaf.org" lang="">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Security Example</title>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>User Information Page</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-<h1>User <span th:text="${user.firstname}"></span>, welcome spring boot security page!</h1>
-<h1>User Information</h1>
-<p><strong>Username:</strong> <span th:text="${user.username}">Username</span></p>
-<p><strong>Firstname:</strong> <span th:text="${user.firstname}">Firstname</span></p>
-<p><strong>Lastname:</strong>  <span th:text="${user.lastname}">Lastname</span></p>
-<p><strong>Age:</strong>  <span th:text="${user.age}">Age</span></p>
-<p><strong>Email:</strong> <span th:text="${user.email}">Email</span></p>
-<p><strong>Password:</strong> <span th:text="${user.password}">Password</span></p>
-<p><strong>Roles:</strong> <span th:each="role : ${user.authorities}" th:text="${role}">ROLE</span></p>
-<a th:href="@{/logout}">Logout</a>
-<script src="/js/jquery-3.5.1.slim.min.js"></script>
-<script src="/js/popper.min.js"></script>
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">User Info</a>
+    <span class="navbar-text">
+        <span th:text="${user.username}">Username</span>
+        with
+        <span th:each="role : ${user.roles}" th:text="${role.name} + ' '">Role</span>
+    </span>
+    <div class="ml-auto">
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</nav>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-2">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">User</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-10">
+            <h1>User Information Page</h1>
+            <div class="card mt-3">
+                <div class="card-header">
+                    About User
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Age</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td th:text="${user.id}">ID</td>
+                            <td th:text="${user.firstname}">Firstname</td>
+                            <td th:text="${user.lastname}">Lastname</td>
+                            <td th:text="${user.age}">Age</td>
+                            <td th:text="${user.email}">Email</td>
+                            <td>
+                                <ul>
+                                    <li th:each="role : ${user.roles}" th:text="${role.name}">Roles</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="/js/bootstrap.min.js"></script>
 </body>
 </html>

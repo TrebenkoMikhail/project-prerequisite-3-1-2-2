@@ -3,11 +3,11 @@ package habsida.spring.boot_security.demo.controller;
 import habsida.spring.boot_security.demo.model.Role;
 import habsida.spring.boot_security.demo.model.User;
 import habsida.spring.boot_security.demo.repository.RoleRepository;
-import habsida.spring.boot_security.demo.repository.UserRepository;
 import habsida.spring.boot_security.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -16,7 +16,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 public class AdminController {
@@ -30,30 +33,44 @@ public class AdminController {
         this.roleRepository = roleRepository;
     }
 
-    @GetMapping(value ="/admin")
-    private String adminHome(Model model){
-        model.addAttribute("user", userService.getAllUsers());
+    @GetMapping(value = "/admin")
+    public String adminPage(@AuthenticationPrincipal UserDetails currentUser, Model model) {
+        User user = userService.findByUsername(currentUser.getUsername());
+        model.addAttribute("user", user);
+        model.addAttribute("activeTab", "admin");
         return "admin";
+    }
+    @GetMapping(value ="/admin/allUsers")
+    private String adminAllUsers(Model model, @AuthenticationPrincipal UserDetails currentUser){
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("user", new User());
+        model.addAttribute("activeTab", "allUsers");
+        return "admin-allUsers";
     }
 
     @GetMapping(value = "/admin/add")
-    public String showAddForm(Model model) {
+    public String showAddForm(Model model, @AuthenticationPrincipal UserDetails currentUser) {
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("user", new User());
-        List<Role> allRoles = roleRepository.findAll();
-        model.addAttribute("allRoles", allRoles);
-        return "add-user";
+        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("activeTab", "new-user");
+        return "admin-allUsers";
     }
     @PostMapping(value = "/admin/add")
-    public String addUser(@ModelAttribute User user) {
+    public String addUser(@ModelAttribute User user, Set<Long> roles) {
+        List<Role> userRoles = roleRepository.findAllById(roles);
+        user.setRoles(new HashSet<>(userRoles));
         userService.addUser(user);
-        return "redirect:/admin";
+        return "redirect:/admin/allUsers";
     }
 
     @GetMapping("/admin/edit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String editUserForm(@PathVariable Long id, Model model, HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!isUserAdmin(authentication)) {
+        if (isUserAdmin(authentication)) {
             return "redirect:/access-denied";
         }
         User user = userService.getUserById(id);
@@ -62,47 +79,45 @@ public class AdminController {
         model.addAttribute("allRoles", allRoles);
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         model.addAttribute("_csrf", csrfToken);
-        return "edit-user";
+        model.addAttribute("activeTab", "editUser");
+        return "admin-allUsers";
     }
 
     @PostMapping(value="/admin/edit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String editUserSubmit(@PathVariable("id") Long id,@ModelAttribute("user") User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!isUserAdmin(authentication)) {
+        if (isUserAdmin(authentication)) {
             return "redirect:/access-denied";
         }
         user.setId(id);
         userService.updateUser(user);
-        return "redirect:/admin";
+        return "redirect:/admin/allUsers";
     }
+
     @GetMapping(value = "/admin/delete/{id}")
-    public String deleteUserByIdForm(@PathVariable("id") Long id, Model model) {
-        model.addAttribute("user", id);
-        return "delete-user";
-    }
-    @GetMapping(value = "/admin/delete/{id}")
-    public String deleteUserById(@PathVariable("id") Long id) {
+    public String deleteFormUserById(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails currentUser) {
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("user", userService.getUserById(id));
+        model.addAttribute("activeTab", "deleteUser");
         userService.deleteUserById(id);
-        return "redirect:/admin";
+        return "admin-allUsers";
+    }
+
+    @PostMapping(value = "/admin/delete/{id}")
+    public String deleteUserById(@PathVariable Long id) {
+        userService.deleteUserById(id);
+        return "redirect:/admin/allUsers";
     }
     private boolean isUserAdmin(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
+            return true;
         }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return userDetails.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 
-    private String validateUser(UserDetails user) {
-        if(user.getUsername() == null || user.getUsername().isEmpty()) {
-            return "Username cannot be empty";
-        }
-        if(user.getPassword() == null || user.getPassword().isEmpty()) {
-            return "Password cannot be empty";
-        }
-        return null;
-    }
+
     @GetMapping("/access-denied")
     public String accessDenied() {
         return "access-denied";

@@ -1,0 +1,30 @@
+<div th:fragment="deleteUserFragment">
+<div class="tab-content mt-3">
+    <h2>Delete User</h2>
+    <form th:action="@{/admin/delete/{id}(id=${user.id})}" method="post">
+        <div class="form-group">
+            <label for="firstname">Firstname</label>
+            <input type="text" class="form-control" id="firstname" name="firstname" th:value="${user.firstname}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="lastname">Lastname</label>
+            <input type="text" class="form-control" id="lastname" name="firstname" th:value="${user.lastname}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="age">Age</label>
+            <input type="text" class="form-control" id="age" name="age" th:value="${user.age}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" class="form-control" id="email" name="email" th:value="${user.email}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="roles">Roles</label>
+            <select type="text" class="form-control" id="roles" name="roles" multiple readonly>
+                <option th:each="role : ${user.roles}" th:value="${role.id}" th:text="${role.name}" readonly></option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-danger">Conform Delete</button>
+    </form>
+</div>
+</div>

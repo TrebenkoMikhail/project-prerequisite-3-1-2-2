@@ -16,27 +16,20 @@ public class User implements UserDetails {
     private Long id;
     private String firstname;
     private String lastname;
-    private String age;
+    private int age;
     private String email;
     private String username;
     private String password;
+    private boolean active;
     
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
     joinColumns = @JoinColumn(name = "user_id"))
     private Set<Role> roles;
 
-    public String getAge() {
-        return age;
-    }
-
-    public void setAge(String age) {
-        this.age = age;
-    }
-
     public User(){}
 
-    public User(Long id, String firstname, String lastname, String age,String email, String username, Set<Role> roles, String password) {
+    public User(Long id, String firstname, String lastname, int age,String email, String username, Set<Role> roles, String password) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -71,6 +64,14 @@ public class User implements UserDetails {
         this.lastname = lastname;
     }
 
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -103,9 +104,6 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    public void addRoles(Role role) {
-        this.roles.add(role);
-    }
 
     @Override
     public String toString() {

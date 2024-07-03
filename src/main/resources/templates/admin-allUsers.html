@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <title>Admin Panel</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-link.active {
+            text-align: center;
+        }
+        .nav-link.active1 {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+    </style>
+    <script th:inline="javascript">
+        function showTab(tabName, event) {
+            var tabs = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].style.display = 'none';
+            }
+            document.getElementById(tabName).style.display = 'block';
+
+            var tabButtons = document.getElementsByClassName('tab');
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+
+            var activeTabButton = document.querySelector('.tab[data-tab="' + tabName + '"]');
+            if (activeTabButton) {
+                activeTabButton.classList.add('active');
+            } else {
+                tabButtons[0].classList.add('active');
+            }
+        }
+
+        function handleRoleSelection(selectElement) {
+            var selectedRoleId = selectElement.value;
+            var selectedRoleName = selectElement.options[selectElement.selectedIndex].text;
+
+            showTab(selectedRoleName.toLowerCase(), null);
+        }
+
+        window.onload = function() {
+            showTab('all-users', 'new-user');
+        }
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#"></a>
+    <span class="navbar-text">
+        <span th:text="${currentUser.username}">Username</span>
+        with
+        <span th:each="role : ${currentUser.authorities}" th:text="${role.authority} + ' '">Roles</span>
+    </span>
+    <div class="ml-auto">
+        <a th:href="@{/logout}" class="btn btn-outline-light">Logout</a>
+    </div>
+</nav>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-2">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active1" href="/admin/allUsers">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin">User</a>
+                </li>
+            </ul>
+        </div>
+        <div class="main-content col-10">
+            <h1>Admin panel</h1>
+            <div class="tabs">
+                <button class="tab active btn btn-primary" data-tab="all-users" onclick="showTab('all-users', event)">All Users</button>
+                <button class="tab btn btn-secondary" data-tab="new-user" onclick="showTab('new-user', event)">New User</button>
+            </div>
+            <div class="tab-content" id="all-users">
+                <div class="card">
+                    <div class="card-header">
+                        All Users
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Age</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.id}">ID</td>
+                                <td th:text="${user.firstname}"></td>
+                                <td th:text="${user.lastname}"></td>
+                                <td th:text="${user.age}"></td>
+                                <td th:text="${user.email}"></td>
+                                <td>
+                                    <ul>
+                                        <li th:each="role : ${user.roles}" th:text="${role.name}">Roles</li>
+                                    </ul>
+                                </td>
+                                <td><a th:href="@{/admin/editUser(id=${user.id})}" class="btn btn-info">Edit</a></td>
+                                <td><a th:href="@{/admin/deleteUser(id=${user.id})}" class="btn btn-danger">Delete</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="new-user" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        Add New User
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/add}" method="post">
+                            <div class="form-group">
+                                <label for="firstname">Firstname:</label>
+                                <input type="text" class="form-control" id="firstname" name="firstname" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname">Lastname:</label>
+                                <input type="text" class="form-control" id="lastname" name="lastname" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="age">Age:</label>
+                                <input type="text" class="form-control" id="age" name="age" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="username">Username:</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password:</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="roles">Role:</label>
+                                <select class="form-control" id="roles" name="roles" onchange="handleRoleSelection(this)">
+                                    <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">Add new user</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
