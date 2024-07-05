@@ -5,6 +5,7 @@ import habsida.spring.boot_security.demo.model.User;
 import habsida.spring.boot_security.demo.repository.RoleRepository;
 import habsida.spring.boot_security.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -93,19 +94,10 @@ public class AdminController {
         return "redirect:/admin/allUsers";
     }
 
-    @GetMapping(value = "/admin/delete/{id}")
-    public String deleteFormUserById(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails currentUser) {
-        model.addAttribute("currentUser", currentUser);
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("activeTab", "deleteUser");
+    @DeleteMapping("/deleteUser/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
-        return "admin-allUsers";
-    }
-
-    @PostMapping(value = "/admin/delete/{id}")
-    public String deleteUserById(@PathVariable Long id) {
-        userService.deleteUserById(id);
-        return "redirect:/admin/allUsers";
+        return ResponseEntity.noContent().build();
     }
     private boolean isUserAdmin(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
