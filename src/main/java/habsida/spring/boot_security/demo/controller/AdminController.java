@@ -91,15 +91,14 @@ public class AdminController {
     }
 
     @GetMapping(value = "/admin/delete/{id}")
-    public String deleteFormUserById(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails currentUser) {
-        model.addAttribute("currentUser", currentUser);
+    public String deleteFormUserById(@PathVariable Long id, Model model) {
         model.addAttribute("user", userService.getUserById(id));
         model.addAttribute("allRoles", roleRepository.findAll());
         model.addAttribute("activeTab", "deleteModal");
         return "admin-allUsers";
     }
 
-    @PostMapping(value = "/admin/delete/{id}")
+    @DeleteMapping(value = "/admin/delete/{id}")
     public String deleteUserById(@PathVariable Long id) {
         userService.deleteUserById(id);
         return "redirect:/admin/allUsers";
