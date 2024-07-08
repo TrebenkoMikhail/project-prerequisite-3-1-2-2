@@ -43,19 +43,9 @@
             }
         }
 
-        function populateRoles() {
-            var rolesSelect = document.getElementById('roles');
-            roles.forEach(function(role) {
-                var option = document.createElement('option');
-                option.value = role.id;
-                option.textContent = role.name;
-                rolesSelect.appendChild(option);
-            });
-        }
-
         window.onload = function() {
             showTab('all-users');
-            populateRoles();
+
 
             document.getElementById('confirm-delete').addEventListener('click', function() {
                 var userId = document.getElementById('delete-id').value;
@@ -77,16 +67,40 @@
                     alert('Error deleting user');
                 });
             });
-        }
 
-        function showDeleteModal(userId, firstname, lastname, age, email, roles) {
-            document.getElementById('delete-id').value = userId;
+
+        };
+
+        function showDeleteModal(id, firstname, lastname, age, email, roles) {
+            document.getElementById('delete-id').value = id;
             document.getElementById('delete-firstname').value = firstname;
             document.getElementById('delete-lastname').value = lastname;
             document.getElementById('delete-age').value = age;
             document.getElementById('delete-email').value = email;
             document.getElementById('delete-roles').value = roles;
             $('#deleteModal').modal('show');
+        }
+
+        function showEditModal(button) {
+            var id = button.getAttribute('data-id');
+            var firstname = button.getAttribute('data-firstname');
+            var lastname = button.getAttribute('data-lastname');
+            var age = button.getAttribute('data-age');
+            var email = button.getAttribute('data-email');
+            var roles = button.getAttribute('data-roles');
+
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-firstname').value = firstname;
+            document.getElementById('edit-lastname').value = lastname;
+            document.getElementById('edit-age').value = age;
+            document.getElementById('edit-email').value = email;
+
+            var editRolesSelect = document.getElementById('edit-roles');
+            for (var i = 0; i < editRolesSelect.options.length; i++) {
+                editRolesSelect.options[i].selected = roles.split(', ').includes(editRolesSelect.options[i].value);
+            }
+
+            $('#editUserModal').modal('show');
         }
     </script>
 </head>
@@ -151,9 +165,18 @@
                                         <li th:each="role : ${user.roles}" th:text="${role.name}">Roles</li>
                                     </ul>
                                 </td>
-                                <td><a th:href="@{/admin/editUser(id=${user.id})}" class="btn btn-info">Edit</a></td>
                                 <td>
-                                    <button class="btn btn-danger" onclick="showDeleteModal('${user.id}', '${user.firstname}', '${user.lastname}', '${user.age}', '${user.email}', '${user.roles.map(role => role.name).join(', ')}')">Delete</button>
+                                    <button class="btn btn-info"
+                                            data-id="${user.id}"
+                                            data-firstname="${user.firstname}"
+                                            data-lastname="${user.lastname}"
+                                            data-age="${user.age}"
+                                            data-email="${user.email}"
+                                            data-roles="${user.roles.map(role => role.id).join(', ')}"
+                                            onclick="showEditModal(this)">Edit</button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger" onclick="showDeleteModal('${user.id}', '${user.firstname}', '${user.lastname}', '${user.age}', '${user.email}', '${user.roles.map(role => role.id).join(', ')}')">Delete</button>
                                 </td>
                             </tr>
                             </tbody>
@@ -219,17 +242,17 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="deleteUserForm">
+                <form id="deleteUserForm" action="/admin/delete/{id}}" method="post">
                     <div class="form-group">
                         <label for="delete-id">ID</label>
                         <input type="text" class="form-control" id="delete-id" name="id" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="delete-firstname">First Name</label>
+                        <label for="delete-firstname">Firstname</label>
                         <input type="text" class="form-control" id="delete-firstname" name="firstname" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="delete-lastname">Last Name</label>
+                        <label for="delete-lastname">Lastname</label>
                         <input type="text" class="form-control" id="delete-lastname" name="lastname" readonly>
                     </div>
                     <div class="form-group">
@@ -238,16 +261,77 @@
                     </div>
                     <div class="form-group">
                         <label for="delete-email">Email</label>
-                        <input type="text" class="form-control" id="delete-email" name="email" readonly>
+                        <input type="email" class="form-control" id="delete-email" name="email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="delete-username">Username</label>
+                        <input type="text" class="form-control" id="delete-username" name="username" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="delete-password">Password</label>
+                        <input type="text" class="form-control" id="delete-password" name="password" readonly>
                     </div>
                     <div class="form-group">
                         <label for="delete-roles">Role</label>
-                        <input type="text" class="form-control" id="delete-roles" name="roles" readonly>
+                        <select class="form-control" id="delete-roles" name="roles" multiple required>
+                            <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+                        </select>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm" th:action="@{/admin/edit/{id}}" method="post" th:object="${user}">
+                    <div class="form-group">
+                        <label for="edit-id">ID</label>
+                        <input type="text" class="form-control" id="edit-id" name="id" th:field="*{id}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-firstname">Firstname</label>
+                        <input type="text" class="form-control" id="edit-firstname" name="firstname" th:field="*{firstname}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-lastname">Lastname</label>
+                        <input type="text" class="form-control" id="edit-lastname" name="lastname" th:field="*{lastname}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-age">Age</label>
+                        <input type="text" class="form-control" id="edit-age" name="age" th:field="*{age}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-email">Email</label>
+                        <input type="email" class="form-control" id="edit-email" name="email" th:field="*{email}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-username">Username</label>
+                        <input type="text" class="form-control" id="edit-username" name="username" th:field="*{username}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-password">Password</label>
+                        <input type="password" class="form-control" id="edit-password" name="password" th:field="*{password}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-roles">Role</label>
+                        <select class="form-control" id="edit-roles" name="roles" multiple required>
+                            <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
                 </form>
             </div>
         </div>

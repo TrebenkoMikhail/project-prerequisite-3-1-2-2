@@ -5,7 +5,6 @@ import habsida.spring.boot_security.demo.model.User;
 import habsida.spring.boot_security.demo.repository.RoleRepository;
 import habsida.spring.boot_security.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,10 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 public class AdminController {
@@ -78,7 +74,7 @@ public class AdminController {
         model.addAttribute("allRoles", allRoles);
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         model.addAttribute("_csrf", csrfToken);
-        model.addAttribute("activeTab", "editUser");
+        model.addAttribute("activeTab", "editUserModal");
         return "admin-allUsers";
     }
 
@@ -94,10 +90,19 @@ public class AdminController {
         return "redirect:/admin/allUsers";
     }
 
-    @DeleteMapping("/deleteUser/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    @GetMapping(value = "/admin/delete/{id}")
+    public String deleteFormUserById(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails currentUser) {
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("user", userService.getUserById(id));
+        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("activeTab", "deleteModal");
+        return "admin-allUsers";
+    }
+
+    @PostMapping(value = "/admin/delete/{id}")
+    public String deleteUserById(@PathVariable Long id) {
         userService.deleteUserById(id);
-        return ResponseEntity.noContent().build();
+        return "redirect:/admin/allUsers";
     }
     private boolean isUserAdmin(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
