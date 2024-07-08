@@ -1,31 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Please sign in</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    .form-signin {
+        max-width: 330px;
+        padding: 15px;
+        margin: auto;
+    }
+    .form-signin .form-floating:focus-within {
+        z-index: 2;
+    }
+    .form-signin input[type="text"] {
+        margin-bottom: -1px;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    .form-signin input[type="password"] {
+        margin-bottom: 10px;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+</style>
 </head>
-<body>
-<h1>Login</h1>
-<form th:action="@{/login}" method="post">
-    <div>
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username"/><br>
-    </div>
-    <div>
-    <label for="password">Password:</label>
-    <input type="text" id="password" name="password"/><br>
-    </div>
-    <div>
-        <button type="submit">Login</button>
-    </div>
-    <div th:if="${param.error}">
-        Invalid username or password.
-    </div>
-    <div th:if="${param.logout}">
-        You have logged out.
-    </div>
-</form>
-<div>
+<body class="text-center">
+<div class="container">
+    <form class="form-signin" th:action="@{/login}" method="post" >
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <div class="form-floating">
+            <label for="floatingInput"></label>
+            <input type="text" class="form-control" id="floatingInput" th:field="*{user.username}" placeholder="Username" required>
+        </div>
+        <div class="form-floating">
+            <label for="floatingPassword"></label>
+            <input type="password" class="form-control" id="floatingPassword" th:field="*{user.password}" placeholder="Password" required>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <div class="container mt-3" th:if="${param.error}">
+            <p class="text-danger">Invalid username or password.</p>
+        </div>
+        <div class="container mt-3" th:if="${param.logout}">
+            <p class="text-success">You have logged out.</p>
+        </div>
+    </form>
+</div>
+<div class="container mt-5">
     <p>Don't have an account? <a th:href="@{/register}">Register here</a></p>
 </div>
 </body>

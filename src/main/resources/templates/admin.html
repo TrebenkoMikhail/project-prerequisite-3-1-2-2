@@ -1,40 +1,84 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org" lang="">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Spring Security Example</title>
+    <meta charset="UTF-8">
+    <title>Admin Page</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-link.active {
+            text-align: center;
+        }
+        .nav-link.active1 {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-<h1>!Admin, welcome to the Spring Boot Security page!</h1>
-<h3><a href="/admin/add">New User</a></h3>
-<table border="1">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Firstname</th>
-        <th>Lastname</th>
-        <th>Email</th>
-        <th>Username</th>
-        <th>Password</th>
-        <th>Roles</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="user : ${user}">
-        <td th:text="${user.id}">ID</td>
-        <td th:text="${user.firstname}">Firstname</td>
-        <td th:text="${user.lastname}">Lastname</td>
-        <td th:text="${user.email}">Email</td>
-        <td th:text="${user.username}">Username</td>
-        <td th:text="${user.password}">Password</td>
-        <td th:each="role : ${user.authorities}" th:text="${role.authority}">Roles</td>
-        <td>
-            <a th:href="@{/admin/edit/{id}(id=${user.id})}">Edit User</a>
-            <a th:href="@{/admin/delete/{id}(id=${user.id})}">Delete</a>
-        </td>
-    </tr>
-    </tbody>
-</table>
-<a th:href="@{/logout}">Logout</a>
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">User Info</a>
+    <span class="navbar-text">
+        <span th:text="${user.username}">Username</span>
+        with
+        <span th:each="role : ${user.roles}" th:text="${role.name} + ' '">Roles</span>
+    </span>
+    <div class="ml-auto">
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</nav>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-2">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/allUsers">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active1" href="#">User</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-10">
+            <h1>Admin Information Page</h1>
+            <div class="card mt-3">
+                <div class="card-header">
+                    About User
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Firstname</th>
+                            <th>Lastname</th>
+                            <th>Age</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td th:text="${user.id}">ID</td>
+                            <td th:text="${user.firstname}">Firstname</td>
+                            <td th:text="${user.lastname}">Lastname</td>
+                            <td th:text="${user.age}">Age</td>
+                            <td th:text="${user.email}">Email</td>
+                            <td>
+                                <ul>
+                                    <li th:each="role : ${user.roles}" th:text="${role.name}">Roles</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

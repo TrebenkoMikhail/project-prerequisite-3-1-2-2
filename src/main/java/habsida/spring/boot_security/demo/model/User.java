@@ -1,14 +1,11 @@
 package habsida.spring.boot_security.demo.model;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users1")
@@ -19,9 +16,11 @@ public class User implements UserDetails {
     private Long id;
     private String firstname;
     private String lastname;
+    private int age;
     private String email;
     private String username;
     private String password;
+    private boolean active;
     
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles",
@@ -30,10 +29,11 @@ public class User implements UserDetails {
 
     public User(){}
 
-    public User(Long id, String firstname, String lastname, String email, String username, Set<Role> roles, String password) {
+    public User(Long id, String firstname, String lastname, int age,String email, String username, Set<Role> roles, String password) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
+        this.age = age;
         this.email = email;
         this.roles = roles;
         this.username = username;
@@ -62,6 +62,14 @@ public class User implements UserDetails {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
     }
 
     public String getEmail() {
@@ -96,9 +104,6 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    public void addRoles(Role role) {
-        this.roles.add(role);
-    }
 
     @Override
     public String toString() {

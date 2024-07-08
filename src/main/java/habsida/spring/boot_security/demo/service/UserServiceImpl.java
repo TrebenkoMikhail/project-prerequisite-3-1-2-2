@@ -7,7 +7,6 @@ import habsida.spring.boot_security.demo.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -66,6 +65,7 @@ public class UserServiceImpl implements UserService {
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         existingUser.setFirstname(user.getFirstname());
         existingUser.setLastname(user.getLastname());
+        existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
         existingUser.setRoles(user.getRoles());
         logger.info("User updated successfully: {}", existingUser);
@@ -111,5 +111,4 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return user.getRoles();
     }
-
 }
