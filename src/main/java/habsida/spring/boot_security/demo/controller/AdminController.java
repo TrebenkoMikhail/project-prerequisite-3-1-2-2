@@ -80,7 +80,7 @@ public class AdminController {
 
     @PostMapping(value="/admin/edit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String editUserSubmit(@PathVariable("id") Long id,@ModelAttribute("user") User user) {
+    public String editUserSubmit(@PathVariable("id") Long id,@ModelAttribute("user") User user, HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (isUserAdmin(authentication)) {
             return "redirect:/access-denied";
@@ -98,9 +98,14 @@ public class AdminController {
         return "admin-allUsers";
     }
 
-    @DeleteMapping(value = "/admin/delete/{id}")
-    public String deleteUserById(@PathVariable Long id) {
-        userService.deleteUserById(id);
+    @PostMapping("/admin/delete/{id}")
+    public String deleteUser(@PathVariable("id") Long id, Model model) {
+        try {
+            userService.deleteUserById(id);
+            model.addAttribute("message", "User deleted successfully");
+        } catch (Exception e) {
+            model.addAttribute("error", "Error deleting user: " + e.getMessage());
+        }
         return "redirect:/admin/allUsers";
     }
     private boolean isUserAdmin(Authentication authentication) {
