@@ -7,43 +7,31 @@
 </head>
 <body>
     <h1>Register</h1>
-    <form th:action="@{/register}" method="post">
-        <div class="container mt-5">
+    <form id="register-form">
+
             <label for="firstname">Firstname: </label>
             <input type="text" id="firstname" name="firstname">
-        </div>
-        <div class="container mt-5">
+
             <label for="lastname">Lastname: </label>
             <input type="text" id="lastname" name="lastname">
-        </div>
-        <div class="container mt-5">
+
             <label for="age">Age: </label>
             <input type="text" id="age" name="age">
-        </div>
-        <div class="container mt-5">
+
             <label for="email">Email: </label>
             <input type="text" id="email" name="email">
-        </div>
-        <div class="container mt-5">
+
             <label for="username">Username: </label>
             <input type="text" id="username" name="username">
-        </div>
-        <div class="container mt-5">
+
             <label for="password">Password: </label>
             <input type="text" id="password" name="password">
-        </div>
-        <div class="container mt-5">
+
             <label for="roles">Roles</label>
-            <select id="roles" name="roles" th:field="*{user.roles}">
-                <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
-            </select>
-        </div>
-        <div class="container mt-5">
+            <select id="roles" name="roles" th:field="*{user.roles}"></select><br>
+
             <button type="submit">Register</button>
-        </div>
     </form>
-    <script src="/js/"></script>
-    <script src="/js/"></script>
-    <script src="/js/bootstrap.min.js"></script>
+    <script src="src/main/resources/registr.js"></script>
 </body>
 </html>

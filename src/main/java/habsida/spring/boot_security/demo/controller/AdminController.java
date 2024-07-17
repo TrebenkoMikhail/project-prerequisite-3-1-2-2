@@ -5,20 +5,20 @@ import habsida.spring.boot_security.demo.model.User;
 import habsida.spring.boot_security.demo.repository.RoleRepository;
 import habsida.spring.boot_security.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-@Controller
+@RestController("/api/user")
 public class AdminController {
 
     private final UserService userService;
@@ -30,99 +30,49 @@ public class AdminController {
         this.roleRepository = roleRepository;
     }
 
-    @GetMapping(value = "/admin")
-    public String adminPage(@AuthenticationPrincipal UserDetails currentUser, Model model) {
+    @GetMapping(value = "/user")
+    public ResponseEntity<User> adminPage(@AuthenticationPrincipal UserDetails currentUser) {
         User user = userService.findByUsername(currentUser.getUsername());
-        model.addAttribute("user", user);
-        model.addAttribute("activeTab", "admin");
-        return "admin";
+        return ResponseEntity.ok(user);
     }
-    @GetMapping(value ="/admin/allUsers")
-    private String adminAllUsers(Model model, @AuthenticationPrincipal UserDetails currentUser){
-        model.addAttribute("currentUser", currentUser);
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("allRoles", roleRepository.findAll());
-        model.addAttribute("user", new User());
-        model.addAttribute("activeTab", "allUsers");
-        return "admin-allUsers";
+    @GetMapping(value ="/allUsers")
+    private ResponseEntity<List<User>> adminAllUsers(Model model, @AuthenticationPrincipal UserDetails currentUser){
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping(value = "/admin/add")
-    public String showAddForm(Model model, @AuthenticationPrincipal UserDetails currentUser) {
-        model.addAttribute("currentUser", currentUser);
-        model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleRepository.findAll());
-        model.addAttribute("activeTab", "new-user");
-        return "admin-allUsers";
+    @GetMapping("/roles")
+    public ResponseEntity<List<Role>> getAllRoles() {
+        return ResponseEntity.ok(roleRepository.findAll());
     }
-    @PostMapping(value = "/admin/add")
-    public String addUser(@ModelAttribute User user) {
+
+    @PostMapping(value = "/add")
+    public ResponseEntity<String> addUser(@ModelAttribute User user) {
         userService.addUser(user);
-        return "redirect:/admin/allUsers";
+        return ResponseEntity.ok("User added successfully");
     }
 
-    @GetMapping("/admin/edit/{id}")
+    @GetMapping("/edit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String editUserForm(@PathVariable Long id, Model model, HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (isUserAdmin(authentication)) {
-            return "redirect:/access-denied";
-        }
+    public ResponseEntity<User> editUserForm(@PathVariable Long id) {
         User user = userService.getUserById(id);
-        List<Role> allRoles= roleRepository.findAll();
-        model.addAttribute("user", user);
-        model.addAttribute("allRoles", allRoles);
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        model.addAttribute("_csrf", csrfToken);
-        model.addAttribute("activeTab", "editUserModal");
-        return "admin-allUsers";
+        return ResponseEntity.ok(user);
     }
 
-    @PostMapping(value="/admin/edit/{id}")
+    @PostMapping(value="/edit/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public String editUserSubmit(@PathVariable("id") Long id,@ModelAttribute("user") User user, HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (isUserAdmin(authentication)) {
-            return "redirect:/access-denied";
-        }
+    public ResponseEntity<String> editUserSubmit(@PathVariable("id") Long id,@RequestBody User user) {
         user.setId(id);
         userService.updateUser(user);
-        return "redirect:/admin/allUsers";
+        return ResponseEntity.ok("User updated successfully");
     }
 
-    @GetMapping(value = "/admin/delete/{id}")
-    public String deleteFormUserById(@PathVariable Long id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("allRoles", roleRepository.findAll());
-        model.addAttribute("activeTab", "deleteModal");
-        return "admin-allUsers";
-    }
-
-    @PostMapping("/admin/delete/{id}")
-    public String deleteUser(@PathVariable("id") Long id, Model model) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable("id") Long id) {
         try {
             userService.deleteUserById(id);
-            model.addAttribute("message", "User deleted successfully");
+            return ResponseEntity.ok("User deleted successfully");
         } catch (Exception e) {
-            model.addAttribute("error", "Error deleting user: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error deleting user: " + e.getMessage());
         }
-        return "redirect:/admin/allUsers";
-    }
-    private boolean isUserAdmin(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return true;
-        }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userDetails.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-    }
-
-
-    @GetMapping("/access-denied")
-    public String accessDenied() {
-        return "access-denied";
-    }
-    @GetMapping("/error")
-    public String handleError() {
-        return "error";
     }
 }
