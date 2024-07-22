@@ -6,19 +6,14 @@ import habsida.spring.boot_security.demo.repository.RoleRepository;
 import habsida.spring.boot_security.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-@RestController("/api/user")
+@RestController
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private final UserService userService;
@@ -30,40 +25,52 @@ public class AdminController {
         this.roleRepository = roleRepository;
     }
 
-    @GetMapping(value = "/user")
-    public ResponseEntity<User> adminPage(@AuthenticationPrincipal UserDetails currentUser) {
+    @GetMapping("/user")
+    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails currentUser) {
         User user = userService.findByUsername(currentUser.getUsername());
         return ResponseEntity.ok(user);
     }
-    @GetMapping(value ="/allUsers")
-    private ResponseEntity<List<User>> adminAllUsers(Model model, @AuthenticationPrincipal UserDetails currentUser){
-        return ResponseEntity.ok(userService.getAllUsers());
+
+    @GetMapping("/allUsers")
+    public ResponseEntity<List<User>> getAllUsers(@AuthenticationPrincipal UserDetails currentUser) {
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/roles")
     public ResponseEntity<List<Role>> getAllRoles() {
-        return ResponseEntity.ok(roleRepository.findAll());
+        List<Role> roles = roleRepository.findAll();
+        return ResponseEntity.ok(roles);
     }
 
-    @PostMapping(value = "/add")
-    public ResponseEntity<String> addUser(@ModelAttribute User user) {
-        userService.addUser(user);
-        return ResponseEntity.ok("User added successfully");
+    @PostMapping("/add")
+    public ResponseEntity<String> addUser(@RequestBody User user) {
+        try {
+            userService.addUser(user);
+            return ResponseEntity.ok("User added successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error adding user: " + e.getMessage());
+        }
     }
 
     @GetMapping("/edit/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> editUserForm(@PathVariable Long id) {
+    public ResponseEntity<User> getUserForEdit(@PathVariable Long id) {
         User user = userService.getUserById(id);
+        if (user == null) {
+            return ResponseEntity.status(404).body(null);
+        }
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping(value="/edit/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> editUserSubmit(@PathVariable("id") Long id,@RequestBody User user) {
-        user.setId(id);
-        userService.updateUser(user);
-        return ResponseEntity.ok("User updated successfully");
+    @PostMapping("/edit/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
+        try {
+            user.setId(id);
+            userService.updateUser(user);
+            return ResponseEntity.ok("User updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating user: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete/{id}")

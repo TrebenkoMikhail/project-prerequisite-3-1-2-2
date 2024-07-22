@@ -12,10 +12,7 @@ public interface UserService extends UserDetailsService {
     List<User> getAllUsers();
     User getUserById(Long id);
     void saveUser(User user);
-//    void saveAdmin(User user);
-
     void addUser(User user);
-
     void updateUser(User user);
     void deleteUserById(Long id);
     UserDetails loadUserByUsername(String username);

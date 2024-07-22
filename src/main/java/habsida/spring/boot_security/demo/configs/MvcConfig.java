@@ -6,13 +6,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
+
+    @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/user").setViewName("user");
-        registry.addViewController("/admin").setViewName("admin-allUsers");
-        registry.addViewController("/admin/add").setViewName("addUser.html");
-        registry.addViewController("/admin/edit").setViewName("editUser.html");
-        registry.addViewController("/register").setViewName("register");
-        registry.addViewController("/registerAdmin").setViewName("registerAdmin");
-        registry.addViewController("/login").setViewName("login");
+
+        registry.addViewController("/api/user").setViewName("user");
+        registry.addViewController("/api/admin").setViewName("admin-allUsers");
+        registry.addViewController("/api/admin/add").setViewName("addUser");
+        registry.addViewController("/api/admin/edit").setViewName("editUser");
+        registry.addViewController("/api/register").setViewName("register");
+        registry.addViewController("/api/login").setViewName("login");
     }
 }

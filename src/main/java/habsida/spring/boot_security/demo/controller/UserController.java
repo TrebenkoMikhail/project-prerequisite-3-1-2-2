@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+
     private final UserService userService;
 
     @Autowired
@@ -21,8 +22,11 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<User> userHome(@AuthenticationPrincipal UserDetails currentUser) {
+    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails currentUser) {
         User user = userService.findByUsername(currentUser.getUsername());
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(user);
     }
 }
