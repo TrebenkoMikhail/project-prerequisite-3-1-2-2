@@ -13,64 +13,14 @@
     </style>
 </head>
 <body>
-<nav class="navbar navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">User Info</a>
-    <span class="navbar-text">
-        <span th:text="${user.username}">Username</span>
-        with
-        <span th:each="role : ${user.roles}" th:text="${role.name} + ' '">Role</span>
-    </span>
-    <div class="ml-auto">
-        <a th:href="@{/logout}">Logout</a>
-    </div>
-</nav>
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-2">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">User</a>
-                </li>
-            </ul>
-        </div>
-        <div class="col-10">
-            <h1>User Information Page</h1>
-            <div class="card mt-3">
-                <div class="card-header">
-                    About User
-                </div>
-                <div class="card-body">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Firstname</th>
-                                <th>Lastname</th>
-                                <th>Age</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td th:text="${user.id}">ID</td>
-                            <td th:text="${user.firstname}">Firstname</td>
-                            <td th:text="${user.lastname}">Lastname</td>
-                            <td th:text="${user.age}">Age</td>
-                            <td th:text="${user.email}">Email</td>
-                            <td>
-                                <ul>
-                                    <li th:each="role : ${user.roles}" th:text="${role.name}">Roles</li>
-                                </ul>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script src="/js/bootstrap.min.js"></script>
+<h1>User Details</h1>
+<p><strong>ID</strong><span id="user-id"></span></p>
+<p><strong>First Name</strong><span id="user-firstname"></span></p>
+<p><strong>Last Name</strong><span id="user-lastname"></span></p>
+<p><strong>Age</strong><span id="user-age"></span></p>
+<p><strong>Email</strong><span id="user-email"></span></p>
+<p><strong>Roles</strong><span id="user-roles"></span></p>
+
+<script src="../static/js/user.js"></script>
 </body>
 </html>

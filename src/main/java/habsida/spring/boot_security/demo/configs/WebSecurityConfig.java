@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,7 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
     private final SuccessUserHandler successUserHandler;
+
     @Autowired
     @Lazy
     private UserService userService;
@@ -28,21 +31,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/user/**").hasRole("USER")
-                .antMatchers("/login", "/register", "/admin/edit/{id}", "/admin/allUsers", "/admin/delete/{id}")
+                .antMatchers("/api/admin/**").hasRole("ADMIN")
+                .antMatchers("/api/user/**").hasRole("USER")
+                .antMatchers("/api/login", "/api/auth/register", "/api/auth/login") // Оставлены только публичные URL
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login")
+                .loginPage("/api/login")
                 .successHandler(successUserHandler)
                 .permitAll()
                 .and()
                 .logout()
                 .permitAll()
                 .and()
-                .csrf();
+                .csrf().disable(); // Возможно, вам не нужно явно включать CSRF, если используете другие механизмы безопасности
     }
 
     @Override
@@ -50,8 +53,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(userService::loadUserByUsername)
                 .passwordEncoder(passwordEncoder());
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 }

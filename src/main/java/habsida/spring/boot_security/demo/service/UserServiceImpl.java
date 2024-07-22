@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import javax.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
@@ -23,56 +24,71 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-    @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    }
     public void saveUser(User user) {
         user.setRoles(user.getRoles());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+    }
 
     @Override
     public void addUser(User user) {
-        user.setRoles(user.getRoles());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        Set<Role> persistedRoles = new HashSet<>();
+        for (Role role : user.getRoles()) {
+            Role persistedRole = roleRepository.findByName(role.getName());
+            if (persistedRole == null) {
+                persistedRole = roleRepository.save(role); // Save the role if it doesn't exist
+            }
+            persistedRoles.add(persistedRole);
+        }
+        user.setRoles(persistedRoles);
         userRepository.save(user);
     }
 
     @Override
     public void updateUser(User user) {
-        User existingUser = userRepository.findById(user.getId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        existingUser.setId(user.getId());
+        User existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + user.getId()));
+
         existingUser.setUsername(user.getUsername());
-        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         existingUser.setFirstname(user.getFirstname());
         existingUser.setLastname(user.getLastname());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
         existingUser.setRoles(user.getRoles());
-        logger.info("User updated successfully: {}", existingUser);
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         userRepository.save(existingUser);
+        logger.info("User updated successfully: {}", existingUser.getUsername());
     }
 
     @Override
     public void deleteUserById(Long id) {
-        if(userRepository.existsById(id)) {
+        if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
             logger.info("User with id {} has been removed", id);
         } else {
@@ -86,6 +102,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
+
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (Role role : user.getRoles()) {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
@@ -106,7 +123,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<Role> getUserRolesById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
         return user.getRoles();
     }
 }
