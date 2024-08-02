@@ -1,26 +1,122 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" lang="">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <title>User Information Page</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .nav-link.active {
+            text-align: center;
+        }
+        .nav-link.active1 {
             background-color: #007bff;
             color: white;
             text-align: center;
         }
-    </style>
-</head>
-<body>
-<h1>User Details</h1>
-<p><strong>ID</strong><span id="user-id"></span></p>
-<p><strong>First Name</strong><span id="user-firstname"></span></p>
-<p><strong>Last Name</strong><span id="user-lastname"></span></p>
-<p><strong>Age</strong><span id="user-age"></span></p>
-<p><strong>Email</strong><span id="user-email"></span></p>
-<p><strong>Roles</strong><span id="user-roles"></span></p>
 
-<script src="../static/js/user.js"></script>
+        .navbar-text1 {
+            color: white;
+        }
+        .navbar-text2 {
+            color: white;
+        }
+        .navbar .logout-link {
+            color: grey;
+        }
+    </style>
+    </head>
+    <body>
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="#"></a>
+        <span class="navbar-text">
+            <span id="username" class="navbar-text1">Username with</span>
+            <span id="roles" class="navbar-text2">Roles</span>
+        </span>
+    <div class="ml-auto">
+        <a th:href="@{/logout}" class="logout-link">Logout</a>
+    </div>
+</nav>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-2">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active1" href="#">User</a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-10">
+            <h1>User Information Page</h1>
+            <div class="card mt-3">
+                <div class="card-header">
+                    About User
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Firstname</th>
+                            <th>Lastname</th>
+                            <th>Age</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                        </thead>
+                        <tbody id="user-info">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const usernameElement = document.getElementById('username');
+        const rolesElement = document.getElementById('roles');
+
+        function loadUserData() {
+            fetch('/api/user/home')
+                .then(response => response.json())
+                .then(user => {
+                    usernameElement.textContent = `${user.username} with `;
+
+                    rolesElement.textContent = user.roles.map(role => role.name).join(' ');
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                });
+        }
+
+        loadUserData();
+    });
+
+    function fetchUserData() {
+        fetch('/api/user/home', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(userHtml => {
+                document.getElementById('user-info').innerHTML = userHtml;
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+                alert('Failed to load user data');
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchUserData);
+</script>
 </body>
 </html>

@@ -69,9 +69,19 @@
             },
             body: JSON.stringify({ username, password })
         })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = '/home';
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Login successful") {
+
+                    localStorage.setItem('token', data.token);
+                    const role = data.role;
+                    if (role === "ROLE_ADMIN") {
+                        window.location.href = '/api/admin';
+                    } else if (role === "ROLE_USER") {
+                        window.location.href = '/api/user';
+                    } else {
+                        window.location.href = '/api/login';
+                    }
                 } else {
                     document.getElementById("error-message").style.display = 'block';
                 }

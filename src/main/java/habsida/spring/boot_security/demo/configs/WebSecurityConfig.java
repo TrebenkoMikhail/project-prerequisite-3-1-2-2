@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .antMatchers("/api/user/**").hasRole("USER")
-                .antMatchers("/api/login", "/api/auth/register", "/api/auth/login") // Оставлены только публичные URL
+                .antMatchers( "/api/auth/register", "/api/auth/login", "/css/**", "/js/**") // Оставлены только публичные URL
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -45,7 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                 .permitAll()
                 .and()
-                .csrf().disable(); // Возможно, вам не нужно явно включать CSRF, если используете другие механизмы безопасности
+                .csrf().disable();
     }
 
     @Override
