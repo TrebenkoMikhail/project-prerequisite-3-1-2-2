@@ -5,9 +5,7 @@
     <title>User Information Page</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .nav-link.active {
-            text-align: center;
-        }
+
         .nav-link.active1 {
             background-color: #007bff;
             color: white;
@@ -24,12 +22,12 @@
             color: grey;
         }
     </style>
-    </head>
-    <body>
-    <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand" href="#"></a>
-        <span class="navbar-text">
-            <span id="username" class="navbar-text1">Username with</span>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#"></a>
+    <span class="navbar-text">
+            <span id="username" class="navbar-text1"> with</span>
             <span id="roles" class="navbar-text2">Roles</span>
         </span>
     <div class="ml-auto">
@@ -64,7 +62,6 @@
                         </tr>
                         </thead>
                         <tbody id="user-info">
-
                         </tbody>
                     </table>
                 </div>
@@ -78,45 +75,28 @@
         const rolesElement = document.getElementById('roles');
 
         function loadUserData() {
-            fetch('/api/user/home')
+            fetch('/api/user/home', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            })
                 .then(response => response.json())
-                .then(user => {
-                    usernameElement.textContent = `${user.username} with `;
+                .then(userDetails => {
+                    usernameElement.textContent = `${userDetails.username} with `;
+                    rolesElement.textContent = userDetails.roles.join(' ');
 
-                    rolesElement.textContent = user.roles.map(role => role.name).join(' ');
+                    document.getElementById('user-info').innerHTML = userDetails.html;
                 })
                 .catch(error => {
                     console.error('Error fetching user data:', error);
+                    alert('Failed to load user data');
                 });
         }
 
         loadUserData();
     });
-
-    function fetchUserData() {
-        fetch('/api/user/home', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(userHtml => {
-                document.getElementById('user-info').innerHTML = userHtml;
-            })
-            .catch(error => {
-                console.error('Error fetching user data:', error);
-                alert('Failed to load user data');
-            });
-    }
-
-    document.addEventListener('DOMContentLoaded', fetchUserData);
 </script>
 </body>
 </html>

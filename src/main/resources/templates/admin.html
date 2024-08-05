@@ -1,19 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Page</title>
+    <title>User Information Page</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .nav-link.active {
-            text-align: center;
-        }
-        .nav-link.active1 {
             background-color: #007bff;
             color: white;
-            text-align: center;
         }
-
         .navbar-text1 {
             color: white;
         }
@@ -27,29 +22,28 @@
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark">
-    <a class="navbar-brand" href="#"></a>
     <span class="navbar-text">
-        <span th:text="${user.username}" class="navbar-text1">Username with</span>
-        <span th:each="role : ${user.roles}" th:text="${role.name} + ' '" class="navbar-text2">Roles</span>
+        <span id="username" class="navbar-text1">${username} with</span>
+        <span id="roles" class="navbar-text2">${roles}</span>
     </span>
     <div class="ml-auto">
-        <a th:href="@{/logout}" class="logout-link">Logout</a>
+        <a href="/logout" class="logout-link">Logout</a>
     </div>
 </nav>
 <div class="container mt-5">
     <div class="row">
         <div class="col-2">
-            <ul class="nav flex-column">
+            <ul id="nav-items" class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active" href="/admin/allUsers">Admin</a>
+                    <a class="nav-link active1" href="/admin/allUsers">Admin</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active1" href="#">User</a>
+                    <a class="nav-link active" href="#">User</a>
                 </li>
             </ul>
         </div>
         <div class="col-10">
-            <h1>Admin Information Page</h1>
+            <h1>User Information Page</h1>
             <div class="card mt-3">
                 <div class="card-header">
                     About User
@@ -59,15 +53,15 @@
                         <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Firstname</th>
-                            <th>Lastname</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
                             <th>Age</th>
                             <th>Email</th>
-                            <th>Role</th>
+                            <th>Roles</th>
                         </tr>
                         </thead>
-                        <tbody id="admin-info">
-
+                        <tbody id="user-info">
+                        <!--USER_DATA-->
                         </tbody>
                     </table>
                 </div>
@@ -75,31 +69,6 @@
         </div>
     </div>
 </div>
-<script>
-    function fetchUserData() {
-        fetch('/api/admin/home', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(userHtml => {
-                document.getElementById('admin-info').innerHTML = userHtml;
-            })
-            .catch(error => {
-                console.error('Error fetching admin data:', error);
-                alert('Failed to load admin data');
-            });
-    }
 
-    document.addEventListener('DOMContentLoaded', fetchUserData);
-</script>
 </body>
 </html>

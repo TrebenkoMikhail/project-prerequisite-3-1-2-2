@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .antMatchers("/api/user/**").hasRole("USER")
-                .antMatchers( "/api/auth/register", "/api/auth/login", "/css/**", "/js/**") // Оставлены только публичные URL
+                .antMatchers( "/api/auth/register", "/api/auth/login")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()

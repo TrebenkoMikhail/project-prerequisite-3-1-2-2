@@ -76,7 +76,7 @@
                     localStorage.setItem('token', data.token);
                     const role = data.role;
                     if (role === "ROLE_ADMIN") {
-                        window.location.href = '/api/admin';
+                        window.location.href = '/api/admin/home';
                     } else if (role === "ROLE_USER") {
                         window.location.href = '/api/user';
                     } else {

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -21,15 +23,18 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/home")
-    public ResponseEntity<String> getUserPage(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getUserPage(Authentication authentication) {
         String username = authentication.getName();
         User user = userService.findByUsername(username);
 
         if (user != null) {
-            String userHtml = generateUserHtml(user);
-            return ResponseEntity.ok(userHtml);
+            Map<String, Object> userDetails = new HashMap<>();
+            userDetails.put("username", user.getUsername());
+            userDetails.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
+            userDetails.put("html", generateUserHtml(user));
+            return ResponseEntity.ok(userDetails);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -45,4 +50,5 @@ public class UserController {
                 .collect(Collectors.joining(", ")) + "</td>" +
                 "</tr>";
     }
+
 }

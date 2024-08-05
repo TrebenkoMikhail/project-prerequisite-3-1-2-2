@@ -5,147 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
     <style>
-        /* styles.css */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
 
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        nav {
-            background-color: #444;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-        }
-
-        nav ul li {
-            margin: 0;
-        }
-
-        nav ul li a {
-            color: #fff;
-            padding: 10px 20px;
-            text-decoration: none;
-            display: block;
-        }
-
-        nav ul li a.active {
-            background-color: #666;
-        }
-
-        main {
-            flex: 1;
-            padding: 20px;
-        }
-
-        h1 {
-            margin-top: 0;
-        }
-
-        .actions {
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        table th, table td {
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        table th {
-            background-color: #f0f0f0;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            cursor: pointer;
-        }
-
-        button#newUserBtn {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        button.edit {
-            background-color: #17a2b8;
-            color: #fff;
-        }
-
-        button.delete {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        /* Modal Styling */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
-            padding-top: 60px;
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <span id="userDetails">Loading user details...</span>
+        <span id="allUsers">Loading user details...</span>
         <a href="/logout">Logout</a>
     </header>
     <nav>
@@ -155,7 +21,7 @@
         </ul>
     </nav>
     <main>
-        <h1>Admin panel</h1>
+        <h1>Admin Panel</h1>
         <div class="actions">
             <button id="newUserBtn">New User</button>
         </div>
@@ -173,6 +39,7 @@
             </tr>
             </thead>
             <tbody id="userTableBody">
+
             </tbody>
         </table>
     </main>
@@ -180,28 +47,10 @@
 
 <div id="regUserModal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span class="close"></span>
         <h2>Register User</h2>
         <form id="regUserForm">
-            <label for="firstName">First Name:</label>
-            <input type="text" id="firstName" name="firstName" required>
 
-            <label for="lastName">Last Name:</label>
-            <input type="text" id="lastName" name="lastName" required>
-
-            <label for="age">Age:</label>
-            <input type="number" id="age" name="age" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="roles">Role:</label>
-            <select id="roles" name="roles" required>
-                <option value="ADMIN">ADMIN</option>
-                <option value="USER">USER</option>
-            </select>
-
-            <button type="submit">Submit</button>
         </form>
     </div>
 </div>
@@ -213,7 +62,7 @@
         const newUserBtn = document.getElementById("newUserBtn");
         const closeBtn = document.querySelector(".close");
         const userTableBody = document.getElementById("userTableBody");
-        const userDetails = document.getElementById("userDetails");
+        const allUsers = document.getElementById("allUsers");
 
         function openModal() {
             regUserModal.style.display = "block";
@@ -275,35 +124,34 @@
                     users.forEach(user => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                        <td>${user.id}</td>
-                        <td>${user.firstName}</td>
-                        <td>${user.lastName}</td>
-                        <td>${user.age}</td>
-                        <td>${user.email}</td>
-                        <td>${user.roles.join(', ')}</td>
-                        <td><button class="edit" data-id="${user.id}">Edit</button></td>
-                        <td><button class="delete" data-id="${user.id}">Delete</button></td>
-                    `;
+                            <td>${user.id}</td>
+                            <td>${user.firstName}</td>
+                            <td>${user.lastName}</td>
+                            <td>${user.age}</td>
+                            <td>${user.email}</td>
+                            <td>${user.roles.join(', ')}</td>
+                            <td><button class="edit" data-id="${user.id}">Edit</button></td>
+                            <td><button class="delete" data-id="${user.id}">Delete</button></td>
+                        `;
                         userTableBody.appendChild(row);
                     });
                 });
         }
 
-        function fetchUserDetails() {
-            fetch('/api/user/home')
-                .then(response => response.json())
-                .then(data => {
-                    const roles = data.roles.map(role => role.name).join(', ');
-                    userDetails.textContent = `${data.username} with roles [${roles}]`;
+        function fetchAllUsers() {
+            fetch('/api/admin/allUsers')
+                .then(response => response.text())
+                .then(html => {
+                    allUsers.innerHTML = html;
                 })
                 .catch(error => {
                     console.error('Error fetching user details:', error);
-                    userDetails.textContent = 'Error loading user details';
+                    allUsers.textContent = 'Error loading user details';
                 });
         }
 
         fetchUsers();
-        fetchUserDetails();
+        fetchAllUsers();
     });
 </script>
 </body>
