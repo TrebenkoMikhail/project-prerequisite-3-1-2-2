@@ -80,35 +80,42 @@ public class AdminController {
     }
 
     @GetMapping(value = "/allUsers", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> getUserDetailsHtml(Authentication authentication) {
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("<h1>401 Unauthorized</h1>");
-        }
-
+    public ResponseEntity<String> getUserDetailsHtml(Authentication authentication) throws IOException {
         String username = authentication.getName();
         User user = userService.findByUsername(username);
+        Resource resource = resourceLoader.getResource("classpath:templates/admin-allUsers.html");
+        byte[] fileData = FileCopyUtils.copyToByteArray(resource.getInputStream());
+        String allUsersHtml = new String(fileData, StandardCharsets.UTF_8);
 
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("<h1>404 Not Found</h1>");
+        // Подстановка username и roles в шаблон
+        if (user != null) {
+            allUsersHtml = allUsersHtml.replace("${username}", user.getUsername());
+            allUsersHtml = allUsersHtml.replace("${roles}", user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")));
         }
 
+        // Получение всех пользователей и замена соответствующего плейсхолдера
         List<User> allUsers = userService.getAllUsers();
-        StringBuilder htmlResponse = new StringBuilder("<html><body><h1>All Users</h1><table class=\"table\"><tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Age</th><th>Email</th><th>Role</th></tr>");
+        StringBuilder userRows = new StringBuilder();
 
         for (User u : allUsers) {
-            htmlResponse.append("<tr>")
+            userRows.append("<tr>")
                     .append("<td>").append(u.getId()).append("</td>")
                     .append("<td>").append(u.getFirstname()).append("</td>")
                     .append("<td>").append(u.getLastname()).append("</td>")
                     .append("<td>").append(u.getAge()).append("</td>")
                     .append("<td>").append(u.getEmail()).append("</td>")
                     .append("<td>").append(u.getRoles().stream().map(Role::getName).collect(Collectors.joining(", "))).append("</td>")
+                    .append("<td><button class='btn btn-primary edit' data-id='").append(u.getId()).append("'>Edit</button></td>")
+                    .append("<td><button class='btn btn-danger delete' data-id='").append(u.getId()).append("'>Delete</button></td>")
                     .append("</tr>");
         }
-        htmlResponse.append("</table></body></html>");
 
-        return ResponseEntity.ok(htmlResponse.toString());
+        allUsersHtml = allUsersHtml.replace("<!--USERS_DATA-->", userRows.toString());
+
+        return ResponseEntity.ok(allUsersHtml);
     }
+
+
 
     @PostMapping("/add")
     public ResponseEntity<?> addUser(@RequestBody User user) {

@@ -2,156 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Admin and User Information Page</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .navbar-text1 {
+            color: white;
+        }
+        .navbar-text2 {
+            color: white;
+        }
+        .navbar .logout-link {
+            color: grey;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <span id="allUsers">Loading user details...</span>
-        <a href="/logout">Logout</a>
-    </header>
-    <nav>
-        <ul>
-            <li><a href="#" class="active">Admin</a></li>
-            <li><a href="#">User</a></li>
-        </ul>
-    </nav>
-    <main>
-        <h1>Admin Panel</h1>
-        <div class="actions">
-            <button id="newUserBtn">New User</button>
+<nav class="navbar navbar-dark bg-dark">
+    <span class="navbar-text">
+        <span id="username" class="navbar-text1">${username}</span>
+        <span id="roles" class="navbar-text2">${roles}</span>
+    </span>
+    <div class="ml-auto">
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+</nav>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-2">
+            <ul id="nav-items" class="nav flex-column">
+                <li class="nav-item">
+                    <a id="admin-link" class="nav-link active" href="#" onclick="loadAdminPage()">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a id="user-link" class="nav-link" href="#" onclick="loadUserPage()">User</a>
+                </li>
+            </ul>
         </div>
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Age</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Edit</th>
-                <th>Delete</th>
-            </tr>
-            </thead>
-            <tbody id="userTableBody">
-
-            </tbody>
-        </table>
-    </main>
-</div>
-
-<div id="regUserModal" class="modal">
-    <div class="modal-content">
-        <span class="close"></span>
-        <h2>Register User</h2>
-        <form id="regUserForm">
-
-        </form>
+        <div class="col-10">
+            <h1 id="page-title">Admin Panel</h1>
+            <div id="page-content" class="card mt-3">
+                <!-- Content will be dynamically loaded here -->
+                <div class="card-header">
+                    All Users
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Age</th>
+                            <th>Email</th>
+                            <th>Roles</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!--USERS_DATA-->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const regUserModal = document.getElementById("regUserModal");
-        const regUserForm = document.getElementById("regUserForm");
-        const newUserBtn = document.getElementById("newUserBtn");
-        const closeBtn = document.querySelector(".close");
-        const userTableBody = document.getElementById("userTableBody");
-        const allUsers = document.getElementById("allUsers");
-
-        function openModal() {
-            regUserModal.style.display = "block";
+    // Additional JavaScript logic for handling events can be added here
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('edit')) {
+            const userId = event.target.getAttribute('data-id');
+            // Handle edit functionality
         }
-
-        function closeModal() {
-            regUserModal.style.display = "none";
+        if (event.target.classList.contains('delete')) {
+            const userId = event.target.getAttribute('data-id');
+            // Handle delete functionality
         }
-
-        newUserBtn.addEventListener("click", openModal);
-        closeBtn.addEventListener("click", closeModal);
-        window.addEventListener("click", (event) => {
-            if (event.target === regUserModal) {
-                closeModal();
-            }
-        });
-
-        regUserForm.addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
-
-            if (typeof data.roles === 'string') {
-                data.roles = [data.roles];
-            }
-
-            fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('User registered successfully.');
-                        closeModal();
-                        fetchUsers();
-                    } else {
-                        alert('Registration failed: ' + (data.message || 'Unknown error'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
-        });
-
-        function fetchUsers() {
-            fetch('/api/admin/allUsers')
-                .then(response => response.json())
-                .then(users => {
-                    userTableBody.innerHTML = '';
-                    users.forEach(user => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${user.id}</td>
-                            <td>${user.firstName}</td>
-                            <td>${user.lastName}</td>
-                            <td>${user.age}</td>
-                            <td>${user.email}</td>
-                            <td>${user.roles.join(', ')}</td>
-                            <td><button class="edit" data-id="${user.id}">Edit</button></td>
-                            <td><button class="delete" data-id="${user.id}">Delete</button></td>
-                        `;
-                        userTableBody.appendChild(row);
-                    });
-                });
-        }
-
-        function fetchAllUsers() {
-            fetch('/api/admin/allUsers')
-                .then(response => response.text())
-                .then(html => {
-                    allUsers.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error fetching user details:', error);
-                    allUsers.textContent = 'Error loading user details';
-                });
-        }
-
-        fetchUsers();
-        fetchAllUsers();
     });
 </script>
 </body>

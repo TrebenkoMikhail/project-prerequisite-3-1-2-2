@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Information Page</title>
+    <title>Admin and User Information Page</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .nav-link.active {
@@ -23,8 +23,8 @@
 <body>
 <nav class="navbar navbar-dark bg-dark">
     <span class="navbar-text">
-        <span id="username" class="navbar-text1">${username} with</span>
-        <span id="roles" class="navbar-text2">${roles}</span>
+        <span id="username" class="navbar-text1"></span>
+        <span id="roles" class="navbar-text2"></span>
     </span>
     <div class="ml-auto">
         <a href="/logout" class="logout-link">Logout</a>
@@ -35,16 +35,17 @@
         <div class="col-2">
             <ul id="nav-items" class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active1" href="/admin/allUsers">Admin</a>
+                    <a id="admin-link" class="nav-link" href="#" onclick="loadAdminPage()">Admin</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">User</a>
+                    <a id="user-link" class="nav-link" href="#" onclick="loadUserPage()">User</a>
                 </li>
             </ul>
         </div>
         <div class="col-10">
-            <h1>User Information Page</h1>
-            <div class="card mt-3">
+            <h1 id="page-title">User Information Page</h1>
+            <div id="page-content" class="card mt-3">
+                <!-- Content will be dynamically loaded here -->
                 <div class="card-header">
                     About User
                 </div>
@@ -69,6 +70,105 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUserPage();
+    });
 
+    function loadUserPage() {
+        document.getElementById('page-title').textContent = 'User Information Page';
+        document.getElementById('user-link').classList.add('active');
+        document.getElementById('admin-link').classList.remove('active');
+        fetch('/api/user')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('username').textContent = data.username + ' with';
+                document.getElementById('roles').textContent = data.roles.join(', ');
+                document.getElementById('page-content').innerHTML = `
+                    <div class="card-header">About User</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Age</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>${data.id}</td>
+                                <td>${data.firstname}</td>
+                                <td>${data.lastname}</td>
+                                <td>${data.age}</td>
+                                <td>${data.email}</td>
+                                <td>${data.roles.join(', ')}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            })
+            .catch(error => console.error('There was a problem with the fetch operation:', error));
+    }
+
+    function loadAdminPage() {
+        document.getElementById('page-title').textContent = 'Admin Panel';
+        document.getElementById('admin-link').classList.add('active');
+        document.getElementById('user-link').classList.remove('active');
+        fetch('/api/allUsers')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                let rows = data.map(allUsersHtml => `
+                    <tr>
+                        <td>${allUsersHtml.id}</td>
+                        <td>${allUsersHtml.firstname}</td>
+                        <td>${allUsersHtml.lastname}</td>
+                        <td>${allUsersHtml.age}</td>
+                        <td>${allUsersHtml.email}</td>
+                        <td>${allUsersHtml.roles.join(', ')}</td>
+                        <td><button class="btn btn-primary">Edit</button></td>
+                        <td><button class="btn btn-danger">Delete</button></td>
+                    </tr>
+                `).join('');
+                document.getElementById('page-content').innerHTML = `
+                    <div class="card-header">All Users</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Age</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            })
+            .catch(error => console.error('There was a problem with the fetch operation:', error));
+    }
+</script>
 </body>
 </html>
