@@ -22,9 +22,9 @@
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark">
-    <span class="navbar-text">
-        <span id="username" class="navbar-text1"></span>
-        <span id="roles" class="navbar-text2"></span>
+   <span class="navbar-text">
+        <span id="username" class="navbar-text1">${username} with</span>
+        <span id="roles" class="navbar-text2">${roles}</span>
     </span>
     <div class="ml-auto">
         <a href="/logout" class="logout-link">Logout</a>
@@ -35,7 +35,7 @@
         <div class="col-2">
             <ul id="nav-items" class="nav flex-column">
                 <li class="nav-item">
-                    <a id="admin-link" class="nav-link" href="#" onclick="loadAdminPage()">Admin</a>
+                    <a id="admin-link" class="nav-link" href="/api/admin/allUsers" onclick="loadAdminPage()">Admin</a>
                 </li>
                 <li class="nav-item">
                     <a id="user-link" class="nav-link" href="#" onclick="loadUserPage()">User</a>
@@ -120,55 +120,7 @@
             .catch(error => console.error('There was a problem with the fetch operation:', error));
     }
 
-    function loadAdminPage() {
-        document.getElementById('page-title').textContent = 'Admin Panel';
-        document.getElementById('admin-link').classList.add('active');
-        document.getElementById('user-link').classList.remove('active');
-        fetch('/api/allUsers')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                let rows = data.map(allUsersHtml => `
-                    <tr>
-                        <td>${allUsersHtml.id}</td>
-                        <td>${allUsersHtml.firstname}</td>
-                        <td>${allUsersHtml.lastname}</td>
-                        <td>${allUsersHtml.age}</td>
-                        <td>${allUsersHtml.email}</td>
-                        <td>${allUsersHtml.roles.join(', ')}</td>
-                        <td><button class="btn btn-primary">Edit</button></td>
-                        <td><button class="btn btn-danger">Delete</button></td>
-                    </tr>
-                `).join('');
-                document.getElementById('page-content').innerHTML = `
-                    <div class="card-header">All Users</div>
-                    <div class="card-body">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Age</th>
-                                <th>Email</th>
-                                <th>Roles</th>
-                                <th>Edit</th>
-                                <th>Delete</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            ${rows}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            })
-            .catch(error => console.error('There was a problem with the fetch operation:', error));
-    }
+
 </script>
 </body>
 </html>

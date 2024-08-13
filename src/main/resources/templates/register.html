@@ -93,10 +93,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-
-                    window.location.href = '/login';
+                    window.location.href = '/api/login';
                 } else {
-                    // Show error message
                     alert('Registration failed: ' + (data.message || 'Unknown error'));
                 }
             })

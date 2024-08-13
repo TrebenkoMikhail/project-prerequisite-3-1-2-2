@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -73,7 +71,7 @@ public class AdminController {
                 "</tr>";
     }
 
-    @GetMapping("/roles")
+    @GetMapping("/api/admin/roles")
     public ResponseEntity<List<Role>> getAllRoles() {
         List<Role> roles = roleRepository.findAll();
         return ResponseEntity.ok(roles);
@@ -87,13 +85,11 @@ public class AdminController {
         byte[] fileData = FileCopyUtils.copyToByteArray(resource.getInputStream());
         String allUsersHtml = new String(fileData, StandardCharsets.UTF_8);
 
-        // Подстановка username и roles в шаблон
         if (user != null) {
             allUsersHtml = allUsersHtml.replace("${username}", user.getUsername());
             allUsersHtml = allUsersHtml.replace("${roles}", user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")));
         }
 
-        // Получение всех пользователей и замена соответствующего плейсхолдера
         List<User> allUsers = userService.getAllUsers();
         StringBuilder userRows = new StringBuilder();
 
@@ -115,18 +111,19 @@ public class AdminController {
         return ResponseEntity.ok(allUsersHtml);
     }
 
-
-
     @PostMapping("/add")
     public ResponseEntity<?> addUser(@RequestBody User user) {
+        Set<Role> roles = user.getRoles().stream()
+                .map(role -> roleRepository.findByName(role.getName()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (roles.size() != user.getRoles().size()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"success\": false, \"message\": \"One or more roles are invalid\"}");
+        }
+        user.setRoles(roles);
         userService.addUser(user);
-        return ResponseEntity.ok().body("{\"success\": true}");
-    }
 
-    @GetMapping("/edit/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok().body(user);
+        return ResponseEntity.ok().body("{\"success\": true}");
     }
 
     @PostMapping("/edit/{id}")
@@ -137,7 +134,31 @@ public class AdminController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        userService.deleteUserById(id);
-        return ResponseEntity.ok().body("{\"success\": true}");
+        User user = userService.getUserById(id);
+        if (user != null) {
+            userService.deleteUserById(id);
+            return ResponseEntity.ok().body("User successfully deleted!");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
     }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user != null) {
+            Map<String, Object> userDetails = new HashMap<>();
+            userDetails.put("id", user.getId());
+            userDetails.put("firstname", user.getFirstname());
+            userDetails.put("lastname", user.getLastname());
+            userDetails.put("age", user.getAge());
+            userDetails.put("email", user.getEmail());
+            userDetails.put("username", user.getUsername());
+            userDetails.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
+            return ResponseEntity.ok(userDetails);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+    }
+
 }
