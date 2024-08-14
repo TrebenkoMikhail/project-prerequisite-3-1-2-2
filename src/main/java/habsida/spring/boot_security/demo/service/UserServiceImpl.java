@@ -35,11 +35,6 @@ public class UserServiceImpl implements UserService {
         this.roleRepository = roleRepository;
     }
 
-    public void saveUser(User user) {
-        user.setRoles(user.getRoles());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-    }
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();

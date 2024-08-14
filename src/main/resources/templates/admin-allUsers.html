@@ -41,7 +41,7 @@
         <div class="col-2">
             <ul id="nav-items" class="nav flex-column">
                 <li class="nav-item">
-                    <a id="admin-link" class="nav-link active" href="/api/admin/allUsers" onclick="loadAdminPage()">Admin</a>
+                    <a id="admin-link" class="nav-link active" href="/api/admin/allUsers">Admin</a>
                 </li>
                 <li class="nav-item">
                     <a id="user-link" class="nav-link" href="/api/admin/home" onclick="loadUserPage()">User</a>
@@ -197,7 +197,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="deleteUserForm" method="post" onsubmit="return deleteUser(event)">
+                <form id="deleteUserForm" >
                     <div class="form-group">
                         <label for="delete-id">ID</label>
                         <input type="text" class="form-control" id="delete-id" name="id" readonly>

@@ -11,7 +11,6 @@ import java.util.Set;
 public interface UserService extends UserDetailsService {
     List<User> getAllUsers();
     User getUserById(Long id);
-    void saveUser(User user);
     void addUser(User user);
     void updateUser(User user);
     void deleteUserById(Long id);

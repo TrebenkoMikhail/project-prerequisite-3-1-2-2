@@ -98,20 +98,20 @@ public class RegisterController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> registerUser(@RequestBody User user) {
+        Map<String, Object> response = new HashMap<>();
         try {
             logger.debug("Received user registration data: {}", user);
             userService.addUser(user);
 
-            Resource resource = resourceLoader.getResource("classpath:templates/login.html");
-            byte[] fileData = FileCopyUtils.copyToByteArray(resource.getInputStream());
-            String loginFormHtml = new String(fileData, StandardCharsets.UTF_8);
-
-            logger.info("User registered successfully: {}", user.getUsername());
-            return new ResponseEntity<>(loginFormHtml, HttpStatus.OK);
+            response.put("success", true);
+            response.put("message", "User registered successfully.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("Error registering user: ", e);
-            return new ResponseEntity<>("Error registering user", HttpStatus.INTERNAL_SERVER_ERROR);
+            response.put("success", false);
+            response.put("message", "Error registering user.");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

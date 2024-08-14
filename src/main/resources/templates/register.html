@@ -3,24 +3,19 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+        }
         body {
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f8f9fa;
-        }
-        .form-container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
+            justify-content: center;
+            padding: 40px 0;
         }
     </style>
+
 </head>
 <body>
 <div class="form-container">
@@ -66,7 +61,7 @@
         fetch('/api/auth/allRoles')
             .then(response => response.json())
             .then(roles => {
-                const rolesSelect = document.getElementById('reg-roles');
+                const rolesSelect = document.getElementById('roles');
                 rolesSelect.innerHTML = '';
 
                 roles.forEach(role => {
@@ -86,43 +81,46 @@
             });
     }
 
-        document.getElementById("regUserModal").addEventListener("submit", function(event) {
+    document.addEventListener('DOMContentLoaded', function() {
+        loadRoles();
+    });
+
+    document.getElementById("regUserModal").addEventListener("submit", function(event) {
         event.preventDefault();
 
-            const selectedRoles = Array.from(document.getElementById('allRoles').selectedOptions)
-                .map(option => ({name: option.value}));
+        const selectedRoles = Array.from(document.getElementById('roles').selectedOptions)
+            .map(option => option.value);
 
-            const user = {
-                firstname: document.getElementById('reg-firstname').value,
-                lastname: document.getElementById('reg-lastname').value,
-                age: document.getElementById('reg-age').value,
-                username: document.getElementById('reg-username').value,
-                password: document.getElementById('reg-password').value,
-                email: document.getElementById('reg-email').value,
-                roles: selectedRoles
-            };
+        const user = {
+            firstname: document.getElementById('reg-firstname').value,
+            lastname: document.getElementById('reg-lastname').value,
+            age: document.getElementById('reg-age').value,
+            username: document.getElementById('reg-username').value,
+            password: document.getElementById('reg-password').value,
+            email: document.getElementById('reg-email').value,
+            roles: selectedRoles
+        };
 
-            fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(user)
+        fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('User registered successfully!');
+                    window.location.href = '/api/auth/login';
+                } else {
+                    alert('Failed to register user: ' + (data.message || 'Unknown error'));
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('User registered successfully!');
-                        document.getElementById('regUserModal').reset();
-                        location.reload();
-                    } else {
-                        alert('Failed to register user.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred.');
-                });
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            });
     });
 
 </script>
