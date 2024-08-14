@@ -53,16 +53,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void addUser(User user) {
-
-        Set<Role> persistedRoles = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            Role persistedRole = roleRepository.findByName(role.getName());
-            if (persistedRole == null) {
-                persistedRole = roleRepository.save(role); // Save the role if it doesn't exist
-            }
-            persistedRoles.add(persistedRole);
+        Set<Role> roles = new HashSet<>();
+        for (Role roleName : user.getRoles()) {
+            Role role = roleRepository.findByName(roleName.getName());
+            roles.add(role);
         }
-        user.setRoles(persistedRoles);
+        user.setRoles(roles);
         userRepository.save(user);
     }
 
@@ -76,7 +72,13 @@ public class UserServiceImpl implements UserService {
         existingUser.setLastname(user.getLastname());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
-        existingUser.setRoles(user.getRoles());
+
+        Set<Role> roles = new HashSet<>();
+        for (Role roleName : user.getRoles()) {
+            Role role = roleRepository.findByName(roleName.getName());
+            roles.add(role);
+        }
+        existingUser.setRoles(roles);
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -85,6 +87,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(existingUser);
         logger.info("User updated successfully: {}", existingUser.getUsername());
     }
+
 
     @Override
     public void deleteUserById(Long id) {

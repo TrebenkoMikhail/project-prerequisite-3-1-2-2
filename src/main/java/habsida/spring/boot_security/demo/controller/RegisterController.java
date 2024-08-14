@@ -33,7 +33,7 @@ public class RegisterController {
     private final AuthenticationManager authenticationManager;
     private final RoleRepository roleRepository;
 
-    @GetMapping("/allroles")
+    @GetMapping("/allRoles")
     public ResponseEntity<List<Role>> getAllRoles(){
         List<Role> allRoles = roleRepository.findAll();
         return ResponseEntity.ok(allRoles);

@@ -1,6 +1,5 @@
 package habsida.spring.boot_security.demo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import habsida.spring.boot_security.demo.model.Role;
 import habsida.spring.boot_security.demo.model.User;
 import habsida.spring.boot_security.demo.repository.RoleRepository;
@@ -127,9 +126,14 @@ public class AdminController {
     }
 
     @PostMapping("/edit/{id}")
-    public ResponseEntity<?> updateUser(@RequestBody User user) {
-        userService.updateUser(user);
-        return ResponseEntity.ok().body("{\"success\": true}");
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        User existingUser = userService.getUserById(id);
+        if (existingUser != null) {
+            userService.updateUser(updatedUser);
+            return ResponseEntity.ok().body(Collections.singletonMap("success", true));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("success", false));
+        }
     }
 
     @DeleteMapping("/delete/{id}")
