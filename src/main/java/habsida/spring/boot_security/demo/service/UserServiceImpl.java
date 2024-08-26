@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
             roles.add(role);
         }
         user.setRoles(roles);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -76,7 +77,9 @@ public class UserServiceImpl implements UserService {
         existingUser.setRoles(roles);
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+                existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
         }
 
         userRepository.save(existingUser);

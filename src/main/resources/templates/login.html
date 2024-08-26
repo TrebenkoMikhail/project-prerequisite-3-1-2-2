@@ -73,12 +73,12 @@
             .then(data => {
                 if (data.message === "Login successful") {
 
-                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('token', data);
                     const role = data.role;
                     if (role === "ROLE_ADMIN") {
                         window.location.href = '/api/admin/home';
                     } else if (role === "ROLE_USER") {
-                        window.location.href = '/api/user';
+                        window.location.href = '/api/user/home';
                     } else {
                         window.location.href = '/api/login';
                     }

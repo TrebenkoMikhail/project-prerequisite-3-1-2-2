@@ -35,7 +35,7 @@ public class AdminController {
     }
 
     @GetMapping("/home")
-    public ResponseEntity<String> getHomePage(Authentication authentication) {
+    public ResponseEntity<String> getAdminHomePage(Authentication authentication) {
         try {
             Resource resource = resourceLoader.getResource("classpath:templates/admin.html");
             byte[] fileData = FileCopyUtils.copyToByteArray(resource.getInputStream());
@@ -49,7 +49,7 @@ public class AdminController {
                 homeHtml = homeHtml.replace("${roles}", user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")));
 
                 String userHtml = generateUserHtml(user);
-                homeHtml = homeHtml.replace("<!--USER_DATA-->", userHtml);
+                homeHtml = homeHtml.replace("<!--ADMIN_DATA-->", userHtml);
             }
 
             return new ResponseEntity<>(homeHtml, HttpStatus.OK);

@@ -4,15 +4,18 @@ import habsida.spring.boot_security.demo.model.Role;
 import habsida.spring.boot_security.demo.model.User;
 import habsida.spring.boot_security.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 @RestController
@@ -21,20 +24,31 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    ResourceLoader resourceLoader;
 
     @GetMapping("/home")
-    public ResponseEntity<Map<String, Object>> getUserPage(Authentication authentication) {
-        String username = authentication.getName();
-        User user = userService.findByUsername(username);
+    public ResponseEntity<String> getAdminHomePage(Authentication authentication) {
+        try {
+            Resource resource = resourceLoader.getResource("classpath:templates/user.html");
+            byte[] fileUserData = FileCopyUtils.copyToByteArray(resource.getInputStream());
+            String homeUserHtml = new String(fileUserData, StandardCharsets.UTF_8);
 
-        if (user != null) {
-            Map<String, Object> userDetails = new HashMap<>();
-            userDetails.put("username", user.getUsername());
-            userDetails.put("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toList()));
-            userDetails.put("html", generateUserHtml(user));
-            return ResponseEntity.ok(userDetails);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            String username = authentication.getName();
+            User user = userService.findByUsername(username);
+
+            if (user != null) {
+                homeUserHtml = homeUserHtml.replace("${username}", user.getUsername());
+                homeUserHtml = homeUserHtml.replace("${roles}", user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")));
+
+                String userHtml = generateUserHtml(user);
+                homeUserHtml = homeUserHtml.replace("<!--USER_DATA-->", userHtml);
+            }
+
+            return new ResponseEntity<>(homeUserHtml, HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error loading home page", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -45,10 +59,9 @@ public class UserController {
                 "<td>" + user.getLastname() + "</td>" +
                 "<td>" + user.getAge() + "</td>" +
                 "<td>" + user.getEmail() + "</td>" +
-                "<td>" + user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.joining(", ")) + "</td>" +
+                "<td>" + user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")) + "</td>" +
                 "</tr>";
     }
+
 
 }

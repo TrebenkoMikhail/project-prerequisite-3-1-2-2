@@ -22,7 +22,7 @@ public class User implements UserDetails {
     private String password;
     private boolean active;
     
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles",
     joinColumns = @JoinColumn(name = "user_id"))
     private Set<Role> roles;
