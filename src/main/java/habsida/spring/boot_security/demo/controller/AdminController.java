@@ -70,25 +70,14 @@ public class AdminController {
                 "</tr>";
     }
 
-    @GetMapping("/api/admin/roles")
+    @GetMapping("/roles")
     public ResponseEntity<List<Role>> getAllRoles() {
         List<Role> roles = roleRepository.findAll();
         return ResponseEntity.ok(roles);
     }
 
-    @GetMapping(value = "/allUsers", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping("/allUsers")
     public ResponseEntity<String> getUserDetailsHtml(Authentication authentication) throws IOException {
-        String username = authentication.getName();
-        User user = userService.findByUsername(username);
-        Resource resource = resourceLoader.getResource("classpath:templates/admin-allUsers.html");
-        byte[] fileData = FileCopyUtils.copyToByteArray(resource.getInputStream());
-        String allUsersHtml = new String(fileData, StandardCharsets.UTF_8);
-
-        if (user != null) {
-            allUsersHtml = allUsersHtml.replace("${username}", user.getUsername());
-            allUsersHtml = allUsersHtml.replace("${roles}", user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")));
-        }
-
         List<User> allUsers = userService.getAllUsers();
         StringBuilder userRows = new StringBuilder();
 
@@ -105,9 +94,7 @@ public class AdminController {
                     .append("</tr>");
         }
 
-        allUsersHtml = allUsersHtml.replace("<!--USERS_DATA-->", userRows.toString());
-
-        return ResponseEntity.ok(allUsersHtml);
+        return ResponseEntity.ok(userRows.toString());
     }
 
     @PostMapping("/add")
