@@ -70,12 +70,6 @@ public class AdminController {
                 "</tr>";
     }
 
-    @GetMapping("/roles")
-    public ResponseEntity<List<Role>> getAllRoles() {
-        List<Role> roles = roleRepository.findAll();
-        return ResponseEntity.ok(roles);
-    }
-
     @GetMapping("/allUsers")
     public ResponseEntity<String> getUserDetailsHtml(Authentication authentication) throws IOException {
         List<User> allUsers = userService.getAllUsers();

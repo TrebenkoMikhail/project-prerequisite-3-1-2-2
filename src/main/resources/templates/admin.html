@@ -192,7 +192,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="edit-password">Password:</label>
-                                <input type="password" class="form-control" id="edit-password" name="password" required>
+                                <input type="password" class="form-control" id="edit-password" name="password">
                             </div>
                             <div class="form-group">
                                 <label for="edit-roles">Roles:</label>
@@ -262,7 +262,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const activePanel = localStorage.getItem('activePanel') || 'user'; // Default to 'user'
+        const activePanel = localStorage.getItem('activePanel') || 'user';
 
         if (activePanel === 'admin') {
             showAdmin();
@@ -318,7 +318,7 @@
     }
 
     function loadRoles(selectedRoles = []) {
-        fetch('/api/admin/roles')
+        fetch('/api/roles')
             .then(response => response.json())
             .then(roles => {
                 const rolesSelect = document.getElementById('edit-roles');
@@ -393,7 +393,8 @@
                         document.getElementById('edit-age').value = user.age;
                         document.getElementById('edit-email').value = user.email;
                         document.getElementById('edit-username').value = user.username;
-                        document.getElementById('edit-password').value = user.password;
+                        document.getElementById('edit-password').value = '';
+
                         loadRoles(user.roles.map(role => role.name));
 
                         $('#editUserModal').modal('show');
@@ -401,7 +402,6 @@
                     .catch(error => console.error('Error:', error));
             }
         });
-
         document.addEventListener('click', function (event) {
             if (event.target.classList.contains('delete')) {
                 const userId = event.target.getAttribute('data-id');

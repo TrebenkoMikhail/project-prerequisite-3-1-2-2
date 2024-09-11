@@ -31,22 +31,17 @@ public class RegisterController {
     private final UserService userService;
     private final ResourceLoader resourceLoader;
     private final AuthenticationManager authenticationManager;
-    private final RoleRepository roleRepository;
 
-    @GetMapping("/allRoles")
-    public ResponseEntity<List<Role>> getAllRoles(){
-        List<Role> allRoles = roleRepository.findAll();
-        return ResponseEntity.ok(allRoles);
-    }
     @Autowired
     private static final Logger logger = LoggerFactory.getLogger(RegisterController.class);
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public RegisterController(UserService userService, RoleRepository roleRepository, ResourceLoader resourceLoader, AuthenticationManager authenticationManager) {
+    public RegisterController(UserService userService, ResourceLoader resourceLoader, AuthenticationManager authenticationManager, RoleRepository roleRepository) {
         this.userService = userService;
         this.resourceLoader = resourceLoader;
-        this.roleRepository = roleRepository;
         this.authenticationManager = authenticationManager;
+        this.roleRepository = roleRepository;
     }
 
     @GetMapping("/login")
@@ -85,11 +80,19 @@ public class RegisterController {
     }
 
     @GetMapping("/register")
-    public ResponseEntity<String> showRegisterForm(){
+    public ResponseEntity<String> showRegisterForm() {
         try {
+            List<Role> roles = roleRepository.findAll();
+
             Resource resource = resourceLoader.getResource("classpath:templates/register.html");
             byte[] fileData = FileCopyUtils.copyToByteArray(resource.getInputStream());
             String registerFormHtml = new String(fileData, StandardCharsets.UTF_8);
+            StringBuilder rolesOptions = new StringBuilder();
+            for (Role role : roles) {
+                rolesOptions.append("<option value=\"").append(role.getName()).append("\">")
+                        .append(role.getName()).append("</option>");
+            }
+            registerFormHtml = registerFormHtml.replace("${rolesOptions}", rolesOptions.toString());
             return new ResponseEntity<>(registerFormHtml, HttpStatus.OK);
         } catch (IOException e) {
             logger.error("Error loading register form: ", e);

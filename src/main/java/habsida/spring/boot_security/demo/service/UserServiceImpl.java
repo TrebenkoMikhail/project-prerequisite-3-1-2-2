@@ -62,26 +62,22 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user) {
         User existingUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + user.getId()));
-
         existingUser.setUsername(user.getUsername());
         existingUser.setFirstname(user.getFirstname());
         existingUser.setLastname(user.getLastname());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
-
         Set<Role> roles = new HashSet<>();
         for (Role roleName : user.getRoles()) {
             Role role = roleRepository.findByName(roleName.getName());
             roles.add(role);
         }
         existingUser.setRoles(roles);
-
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
                 existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
         }
-
         userRepository.save(existingUser);
         logger.info("User updated successfully: {}", existingUser.getUsername());
     }
